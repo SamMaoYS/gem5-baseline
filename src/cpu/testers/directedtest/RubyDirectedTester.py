@@ -56,3 +56,10 @@ class RubyDirectedTester(ClockedObject):
     cpuPort = VectorRequestPort("the cpu ports")
     requests_to_complete = Param.Int("checks to complete")
     generator = Param.DirectedGenerator("the request generator")
+
+class RubyTraceTester(ClockedObject):
+    type = 'RubyDirectedTester'
+    cxx_header = "cpu/testers/directedtest/RubyDirectedTester.hh"
+    cpuPort = VectorRequestPort("the cpu ports")
+    tracefile = Param.String("The path to the trace file")
+    generator = Param.DirectedGenerator("the request generator")

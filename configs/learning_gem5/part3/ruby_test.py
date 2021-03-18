@@ -56,9 +56,15 @@ system.mem_mode = 'timing'               # Use timing accesses
 system.mem_ranges = [AddrRange('512MB')] # Create an address range
 
 # Create the tester
-system.tester = RubyTester(checks_to_complete = 100,
-                           wakeup_frequency = 10,
-                           num_cpus = 2)
+#system.tester = RubyTester(checks_to_complete = 100,
+#                           wakeup_frequency = 10,
+#                           num_cpus = 2)
+
+generator = SeriesRequestGenerator(num_cpus = 2,
+                                       percent_writes = 0)
+system.tester = RubyDirectedTester(requests_to_complete = 2,
+                                    generator = generator)
+
 
 # Create a simple memory controller and connect it to the membus
 system.mem_ctrl = SimpleMemory(latency="50ns", bandwidth="0GB/s")
