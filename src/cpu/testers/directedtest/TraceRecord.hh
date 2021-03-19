@@ -21,8 +21,8 @@ public:
                          std::string type);
     TraceRecord()
     {
-        m_cpu_idx = 0;
         m_time = Cycles(0);
+        m_cpu_idx = 0;
         m_data_address = 0;
         m_pc_address = 0;
         m_cmd = MemCmd::ReadReq;
