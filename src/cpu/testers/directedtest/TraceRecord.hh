@@ -1,5 +1,5 @@
 #ifndef TRACERECORD_HH
-#define TRACERECORD_H
+#define TRACERECORD_HH
 
 #include <string>
 #include <iostream>
@@ -17,8 +17,8 @@ class TraceRecord
 public:
     // Constructors
     TraceRecord(int cpu_id, const Addr &data_addr,
-                         const Addr &pc_addr,
-                         std::string type);
+                const Addr &pc_addr,
+                std::string type);
     TraceRecord()
     {
         m_cpu_idx = 0;
@@ -40,10 +40,10 @@ public:
     {
         return (this->m_time <= rec.m_time);
     }
-    void print(std::ostream &out) const;
+    void print() const;
     bool input(std::istream &in);
 
-private:
+public:
     // Private Methods
 
     // Data Members (m_ prefix)
@@ -58,9 +58,6 @@ private:
 inline extern bool node_less_then_eq(const TraceRecord &n1,
                                      const TraceRecord &n2);
 
-// Output operator declaration
-std::ostream &operator<<(std::ostream &out, const TraceRecord &obj);
-
 // ******************* Definitions *******************
 
 inline extern bool node_less_then_eq(const TraceRecord &n1,
@@ -69,13 +66,5 @@ inline extern bool node_less_then_eq(const TraceRecord &n1,
     return n1.node_less_then_eq(n2);
 }
 
-// Output operator definition
-extern inline std::ostream &operator<<(std::ostream &out,
-                                  const TraceRecord &obj)
-{
-    obj.print(out);
-    out << std::flush;
-    return out;
-}
 
 #endif //TRACERECORD_HH

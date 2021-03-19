@@ -1,17 +1,10 @@
-#ifndef __CPU_DIRECTEDTEST_RUBYTraceTESTER_HH__
-#define __CPU_DIRECTEDTEST_RUBYTraceTESTER_HH__
+#ifndef __CPU_DIRECTEDTEST_RUBYTRACETESTER_HH__
+#define __CPU_DIRECTEDTEST_RUBYTRACETESTER_HH__
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <fstream>
-#include "mem/packet.hh"
-#include "mem/port.hh"
-#include "mem/ruby/common/DataBlock.hh"
-#include "mem/ruby/common/SubBlock.hh"
-#include "mem/ruby/common/TypeDefines.hh"
-#include "params/RubyTraceTester.hh"
-#include "sim/clocked_object.hh"
 
 class RubyTraceTester : public ClockedObject
 {
@@ -58,10 +51,12 @@ public:
   void print(std::ostream &out) const;
 
 protected:
-  EventFunctionWrapper directedStartEvent;
+  EventFunctionWrapper traceStartEvent;
+  EventFunctionWrapper deadlockEvent;
 
 private:
   void hitCallback(NodeID proc, Addr addr);
+  bool makerequest(const TraceRecord &entry);
 
   void checkForDeadlock();
 

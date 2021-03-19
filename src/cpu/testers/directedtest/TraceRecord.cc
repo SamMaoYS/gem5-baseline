@@ -53,3 +53,45 @@ TraceRecord &TraceRecord::operator=(const TraceRecord &obj)
     m_cmd = obj.m_cmd;
     return *this;
 }
+
+bool TraceRecord::input(std::istream &in)
+{
+    in >> m_cpu_idx;
+    in >> m_data_address;
+    in >> m_pc_address;
+    std::string type;
+    if (!in.eof())
+    {
+        in >> type;
+        if (type == "LD")
+        {
+            m_cmd = MemCmd::ReadReq;
+        }
+        else if (type == "ST")
+        {
+            m_cmd = MemCmd::WriteReq;
+        }
+        else if (type == "FENCE")
+        {
+            m_cmd = MemCmd::MemFenceReq;
+        }
+
+        // Ignore the rest of the line
+        char c = '\0';
+        while ((!in.eof()) && (c != '\n'))
+        {
+            in.get(c);
+        }
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void TraceRecord::print() const
+{
+    DPRINTF(DirectedTest, "[TraceRecord: %d %d %d %d]\n",
+            m_cpu_idx, m_data_address, m_pc_address, m_cmd);
+}

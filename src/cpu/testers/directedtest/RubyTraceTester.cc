@@ -1,6 +1,5 @@
 
 #include "cpu/testers/directedtest/RubyTraceTester.hh"
-
 #include "cpu/testers/directedtest/TraceRecord.hh"
 #include "base/logging.hh"
 #include "debug/DirectedTest.hh"
@@ -12,12 +11,15 @@
 
 RubyTraceTester::RubyTraceTester(const Params *p)
     : ClockedObject(p),
-      directedStartEvent([this] { wakeup(); }, "Directed tick",
-                         false, Event::CPU_Tick_Pri),
-    m_trace_file(p->trace_file),
-    m_num_cpus(p->num_cpus),
-    m_deadlock_threshold(p->deadlock_threshold),
-    m_requestorId(p->system->getRequestorId(this))
+      traceStartEvent([this] { wakeup(); }, "Directed tick",
+                      false, Event::CPU_Tick_Pri),
+      deadlockEvent([this] { checkForDeadlock(); }, name(),
+                    false, Event::CPU_Tick_Pri),
+
+      m_trace_file(p->trace_file),
+      m_num_cpus(p->num_cpus),
+      m_deadlock_threshold(p->deadlock_threshold),
+      m_requestorId(p->system->getRequestorId(this))
 {
     m_requests_completed = 0;
     // create the ports
@@ -28,7 +30,8 @@ RubyTraceTester::RubyTraceTester(const Params *p)
     }
 
     // add the check start event to the event queue
-    schedule(directedStartEvent, 1);
+    schedule(traceStartEvent, 1);
+    schedule(deadlockEvent, 1);
 }
 
 RubyTraceTester::~RubyTraceTester()
@@ -49,7 +52,8 @@ void RubyTraceTester::init()
     assert(ports.size() > 0);
 
     m_file_descriptor.open(m_trace_file.c_str());
-    if (m_file_descriptor.fail()) {
+    if (m_file_descriptor.fail())
+    {
         panic("Error: error opening file" + m_trace_file);
         return;
     }
@@ -105,76 +109,67 @@ void RubyTraceTester::hitCallback(NodeID proc, Addr addr)
 
     if (m_requests_inflight == m_requests_completed)
     {
-        schedule(directedStartEvent, curTick() + 1);
+        schedule(traceStartEvent, curTick() + 1);
     }
 }
 
 void RubyTraceTester::wakeup()
 {
-
+    TraceRecord tr_entry;
+    while (tr_entry.input(m_file_descriptor))
     {
-        exitSimLoop("Ruby DirectedTester completed");
+        if (makerequest(tr_entry))
+        {
+            m_requests_inflight++;
+        }
+        else
+        {
+            break;
+        }
     }
-
-    // if file
-    //     ended and m_requests == m
-    //_requests_to_complete
-    //
-    // end it.
-
-    //if (m_requests_completed < m_requests_to_complete)
-    //     {
-    //         if (!generator->initiate())
-    //         {
-    //         }
-    //     }
-
-    // if m_requests_inflight
-    //     == m_requests_completed
-    //             exit
-
-    //         else
+    // If all inflight requests are complete there is no reason for
+    // makerequest to reject request.
+    if (m_requests_completed == m_requests_inflight)
+    {
+        m_file_descriptor.close();
+        exitSimLoop("Ruby DirecteedTester compldTester completed
+        with %d completed", m_requests_inflight);
+    }
 }
 
-RubyTraceTester *
-RubyTraceTesterParams::create()
+bool RubyTraceTester::makerequest(const TraceRecord &entry)
 {
-    return new RubyTraceTester(this);
+    DPRINTF(DirectedTest, "initiating request\n");
+
+    RequestPort *port = getCpuPort(entry.m_cpu_idx);
+
+    Request::Flags flags;
+
+    // For simplicity, requests are assumed to be 1 byte-sized
+    RequestPtr req = std::make_shared<Request>(entry.m_data_address, 1, flags,
+                                               m_requestorId);
+
+    Packet::Command cmd;
+    cmd = entry.m_cmd;
+    PacketPtr pkt = new Packet(req, cmd);
+    pkt->allocate();
+
+    if (port->sendTimingReq(pkt))
+    {
+        DPRINTF(DirectedTest, "initiating request - successful\n");
+        return true;
+    }
+    else
+    {
+        // If the packet did not issue, must delete
+        // Note: No need to delete the data, the packet destructor
+        // will delete it
+        delete pkt;
+
+        DPRINTF(DirectedTest, "failed to initiate - sequencer not ready\n");
+        return false;
+    }
 }
-
-// bool makerequest(const TraceRecord &entry)
-// {
-//     DPRINTF(DirectedTest, "initiating request\n");
-
-//     RequestPort *port = getCpuPort(entry.cpu_id);
-
-//     Request::Flags flags;
-
-//     // For simplicity, requests are assumed to be 1 byte-sized
-//     RequestPtr req = std::make_shared<Request>(entry.m_address, 1, flags,
-//                                                m_requestorId);
-
-//     Packet::Command cmd;
-//     cmd = entry.cmd;
-//     PacketPtr pkt = new Packet(req, cmd);
-//     pkt->allocate();
-
-//     if (port->sendTimingReq(pkt))
-//     {
-//         DPRINTF(DirectedTest, "initiating request - successful\n");
-//         return true;
-//     }
-//     else
-//     {
-//         // If the packet did not issue, must delete
-//         // Note: No need to delete the data, the packet destructor
-//         // will delete it
-//         delete pkt;
-
-//         DPRINTF(DirectedTest, "failed to initiate - sequencer not ready\n");
-//         return false;
-//     }
-// }
 
 void RubyTraceTester::checkForDeadlock()
 {
@@ -191,4 +186,11 @@ void RubyTraceTester::checkForDeadlock()
                   current_time - m_last_progress_vector[processor], processor);
         }
     }
+
+    schedule(deadlockEvent, 1000);
+}
+
+RubyTraceTester *RubyTraceTesterParams::create()
+{
+    return new RubyTraceTester(this);
 }
