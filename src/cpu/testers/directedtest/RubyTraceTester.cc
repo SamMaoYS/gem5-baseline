@@ -132,8 +132,9 @@ void RubyTraceTester::wakeup()
     if (m_requests_completed == m_requests_inflight)
     {
         m_file_descriptor.close();
-        exitSimLoop("Ruby DirecteedTester compldTester completed
-        with %d completed", m_requests_inflight);
+        exitSimLoop("Ruby TraceTester completed \
+        with %d requests",
+                    m_requests_inflight);
     }
 }
 
