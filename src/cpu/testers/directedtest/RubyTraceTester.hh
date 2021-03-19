@@ -6,23 +6,22 @@
 #include <vector>
 #include <fstream>
 
-class RubyTraceTester : public ClockedObject
+#include "cpu/testers/directedtest/TraceRecord.hh"
+#include "mem/packet.hh"
+#include "mem/port.hh"
+#include "mem/ruby/common/DataBlock.hh"
+#include "mem/ruby/common/SubBlock.hh"
+#include "mem/ruby/common/TypeDefines.hh"
+#include "params/RubyTraceTester.hh"
+#include "sim/clocked_object.hh"
+
+CpuPort(const std::string &_name, RubyTraceTester *_tester,
+        PortID _id)
+    : RequestPort(_name, _tester, _id), tester(_tester)
 {
-public:
-  class CpuPort : public RequestPort
   {
   private:
-    RubyTraceTester *tester;
-
-  public:
-    CpuPort(const std::string &_name, RubyTraceTester *_tester,
-            PortID _id)
-        : RequestPort(_name, _tester, _id), tester(_tester)
-    {
-    }
-
-  protected:
-    virtual bool recvTimingResp(PacketPtr pkt);
+    l bool recvTimingResp(PacketPtr pkt);
     virtual void recvReqRetry()
     {
       panic("%s does not expect a retry\n", name());
@@ -42,13 +41,16 @@ public:
 
   void wakeup();
 
-  void incrementCycleCompletions() { m_requests_completed++; }
+  void incrementCycleCompletions()
+  {
+    m_requests_completed++;
+  }
 
-  void printStats(std::ostream &out) const {}
+  void printStats(std::ostream & out) const {}
   void clearStats() {}
-  void printConfig(std::ostream &out) const {}
+  void printConfig(std::ostream & out) const {}
 
-  void print(std::ostream &out) const;
+  void print(std::ostream & out) const;
 
 protected:
   EventFunctionWrapper traceStartEvent;
@@ -75,5 +77,15 @@ private:
 
   std::vector<Cycles> m_last_progress_vector;
 };
+#endif // __CPU_DIRECTEDTEd;
+stS::vector<RequestPort *> ports;
+std::string m_trace_file;
+uint64_t m_requests_inflight;
+std::ifstream m_file_descriptor;
+int m_num_cpus;
+int m_deadlock_threshold;
+RequestorID m_requestorId;
+
+std::vector<Cycles> m_last_progress_vector;
 
 #endif // __CPU_DIRECTEDTEST_RUBYTRACETESTER_HH__
