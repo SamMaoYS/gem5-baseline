@@ -20,7 +20,6 @@ RubyTraceTester::RubyTraceTester(const Params *p)
     m_requestorId(p->system->getRequestorId(this))
 {
     m_requests_completed = 0;
-
     // create the ports
     for (int i = 0; i < p->port_cpuPort_connection_count; ++i)
     {
