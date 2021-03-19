@@ -58,8 +58,10 @@ class RubyDirectedTester(ClockedObject):
     generator = Param.DirectedGenerator("the request generator")
 
 class RubyTraceTester(ClockedObject):
-    type = 'RubyDirectedTester'
-    cxx_header = "cpu/testers/directedtest/RubyDirectedTester.hh"
+    type = 'RubyTraceTester'
+    cxx_header = "cpu/testers/directedtest/RubyTraceTester.hh"
     cpuPort = VectorRequestPort("the cpu ports")
-    tracefile = Param.String("The path to the trace file")
-    generator = Param.DirectedGenerator("the request generator")
+    trace_file = Param.String("The path to the trace file")
+    num_cpus = Param.Int("num of cpus")
+    deadlock_threshold = Param.Int("Deadlock threshold cycles")
+    system = Param.System(Parent.any, "System we belong to")

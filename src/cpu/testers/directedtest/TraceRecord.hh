@@ -2,12 +2,13 @@
 #define TRACERECORD_H
 
 #include <string>
+#include <iostream>
+#include <fstream>
 
 #include "base/logging.hh"
 #include "base/trace.hh"
 #include "base/types.hh"
 #include "debug/DirectedTest.hh"
-#include "mem/ruby/common/SubBlock.hh"
 #include "sim/sim_exit.hh"
 #include "sim/system.hh"
 
@@ -15,13 +16,16 @@ class TraceRecord
 {
 public:
     // Constructors
-    TraceRecord(NodeID id, const Address &data_addr,
-                const Address &pc_addr, std::string type, Cycles time);
+    TraceRecord(int cpu_id, const Addr &data_addr,
+                         const Addr &pc_addr,
+                         std::string type);
     TraceRecord()
     {
-        m_node_num = 0;
+        m_cpu_idx = 0;
         m_time = Cycles(0);
-        m_type = CacheRequestType_NULL;
+        m_data_address = 0;
+        m_pc_address = 0;
+        m_cmd = MemCmd::ReadReq;
     }
 
     // Destructor
@@ -36,9 +40,8 @@ public:
     {
         return (this->m_time <= rec.m_time);
     }
-    void print(ostream &out) const;
-    void output(ostream &out) const;
-    bool input(istream &in);
+    void print(std::ostream &out) const;
+    bool input(std::istream &in);
 
 private:
     // Private Methods
@@ -49,14 +52,14 @@ private:
     Cycles m_time;
     Addr m_data_address;
     Addr m_pc_address;
-    Packet::Command cmd;
+    Packet::Command m_cmd;
 };
 
 inline extern bool node_less_then_eq(const TraceRecord &n1,
                                      const TraceRecord &n2);
 
 // Output operator declaration
-ostream &operator<<(ostream &out, const TraceRecord &obj);
+std::ostream &operator<<(std::ostream &out, const TraceRecord &obj);
 
 // ******************* Definitions *******************
 
@@ -67,11 +70,11 @@ inline extern bool node_less_then_eq(const TraceRecord &n1,
 }
 
 // Output operator definition
-extern inline ostream &operator<<(ostream &out,
+extern inline std::ostream &operator<<(std::ostream &out,
                                   const TraceRecord &obj)
 {
     obj.print(out);
-    out << flush;
+    out << std::flush;
     return out;
 }
 

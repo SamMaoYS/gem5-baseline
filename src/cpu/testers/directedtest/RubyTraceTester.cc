@@ -1,21 +1,23 @@
+
 #include "cpu/testers/directedtest/RubyTraceTester.hh"
 
-#include <string>
-
+#include "cpu/testers/directedtest/TraceRecord.hh"
 #include "base/logging.hh"
-#include "base/trace.hh"
 #include "debug/DirectedTest.hh"
+#include "base/trace.hh"
 #include "mem/ruby/common/SubBlock.hh"
 #include "sim/sim_exit.hh"
+#include "params/RubyTraceTester.hh"
 #include "sim/system.hh"
 
 RubyTraceTester::RubyTraceTester(const Params *p)
     : ClockedObject(p),
       directedStartEvent([this] { wakeup(); }, "Directed tick",
                          false, Event::CPU_Tick_Pri),
-      m_trace_file(p->trace_file),
-      m_requestorId(p->system->getRequestorId(this)),
-      m_num_cpus(p->num_cpus)
+    m_trace_file(p->trace_file),
+    m_num_cpus(p->num_cpus),
+    m_deadlock_threshold(p->deadlock_threshold),
+    m_requestorId(p->system->getRequestorId(this))
 {
     m_requests_completed = 0;
 
@@ -46,6 +48,13 @@ void RubyTraceTester::init()
     }
 
     assert(ports.size() > 0);
+
+    m_file_descriptor.open(m_trace_file.c_str());
+    if (m_file_descriptor.fail()) {
+        panic("Error: error opening file" + m_trace_file);
+        return;
+    }
+    DPRINTF(DirectedTest, "Request trace enabled to output file");
 }
 
 Port &
@@ -86,24 +95,18 @@ RubyTraceTester::getCpuPort(int idx)
     return ports[idx];
 }
 
-void RubyTester::hitCallback(NodeID proc, SubBlock *data)
+void RubyTraceTester::hitCallback(NodeID proc, Addr addr)
 {
     // Mark that we made progress
     m_last_progress_vector[proc] = curCycle();
 
-    DPRINTF(RubyTest, "completed request for proc: %d", proc);
-    DPRINTFR(RubyTest, " addr: 0x%x, size: %d, data: ",
-             data->getAddress(), data->getSize());
-    for (int byte = 0; byte < data->getSize(); byte++)
-    {
-        DPRINTFR(RubyTest, "%d ", data->getByte(byte));
-    }
-    DPRINTFR(RubyTest, "\n");
+    DPRINTF(DirectedTest, "completed request for proc: %d", proc);
+    DPRINTFR(DirectedTest, "\n");
     incrementCycleCompletions();
 
     if (m_requests_inflight == m_requests_completed)
     {
-        schedule(directedStartEvent, curTick() + 1)
+        schedule(directedStartEvent, curTick() + 1);
     }
 }
 
@@ -140,43 +143,41 @@ RubyTraceTesterParams::create()
     return new RubyTraceTester(this);
 }
 
-bool makerequest(const TraceRecord &entry)
-{
-    DPRINTF(DirectedTest, "initiating request\n");
+// bool makerequest(const TraceRecord &entry)
+// {
+//     DPRINTF(DirectedTest, "initiating request\n");
 
-    RequestPort *port = getCpuPort(entry.cpu_id);
+//     RequestPort *port = getCpuPort(entry.cpu_id);
 
-    Request::Flags flags;
+//     Request::Flags flags;
 
-    // For simplicity, requests are assumed to be 1 byte-sized
-    RequestPtr req = std::make_shared<Request>(entry.m_address, 1, flags,
-                                               requestorId);
+//     // For simplicity, requests are assumed to be 1 byte-sized
+//     RequestPtr req = std::make_shared<Request>(entry.m_address, 1, flags,
+//                                                m_requestorId);
 
-    Packet::Command cmd;
-    cmd = trace.cmd;
-    PacketPtr pkt = new Packet(req, cmd);
-    pkt->allocate();
+//     Packet::Command cmd;
+//     cmd = entry.cmd;
+//     PacketPtr pkt = new Packet(req, cmd);
+//     pkt->allocate();
 
-    if (port->sendTimingReq(pkt))
-    {
-        DPRINTF(DirectedTest, "initiating request - successful\n");
-        m_status = SeriesRequestGeneratorStatus_Request_Pending;
-        return true;
-    }
-    else
-    {
-        // If the packet did not issue, must delete
-        // Note: No need to delete the data, the packet destructor
-        // will delete it
-        delete pkt;
+//     if (port->sendTimingReq(pkt))
+//     {
+//         DPRINTF(DirectedTest, "initiating request - successful\n");
+//         return true;
+//     }
+//     else
+//     {
+//         // If the packet did not issue, must delete
+//         // Note: No need to delete the data, the packet destructor
+//         // will delete it
+//         delete pkt;
 
-        DPRINTF(DirectedTest, "failed to initiate -
-        sequencer not ready\n");
-        return false;
-    }
-}
+//         DPRINTF(DirectedTest, "failed to initiate - sequencer not ready\n");
+//         return false;
+//     }
+// }
 
-void RubyTester::checkForDeadlock()
+void RubyTraceTester::checkForDeadlock()
 {
     int size = m_last_progress_vector.size();
     Cycles current_time = curCycle();

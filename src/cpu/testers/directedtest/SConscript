@@ -44,5 +44,8 @@ Source('RubyDirectedTester.cc')
 Source('DirectedGenerator.cc')
 Source('SeriesRequestGenerator.cc')
 Source('InvalidateGenerator.cc')
+Source('RubyTraceTester.cc')
+Source('TraceRecord.cc')
+
 
 DebugFlag('DirectedTest')
