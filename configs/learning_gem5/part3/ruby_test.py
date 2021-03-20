@@ -65,9 +65,8 @@ system.mem_ranges = [AddrRange('512MB')] # Create an address range
 #system.tester = RubyDirectedTester(requests_to_complete = 2,
   #                                  generator = generator)
 
-system.tester = RubyTraceTester(trace_file = """/localhome/
-ashriram/gem5-lab/gem5-baseline/little.trace""",
-num_cpus = 1, deadlock_threshold = 10000)
+system.tester = RubyTraceTester(trace_file = "/localhome/ashriram/gem5-lab"\
+"/gem5-baseline/little.trace", num_cpus = 1, deadlock_threshold = 10000)
 
 # Create a simple memory controller and connect it to the membus
 system.mem_ctrl = SimpleMemory(latency="50ns", bandwidth="0GB/s")
