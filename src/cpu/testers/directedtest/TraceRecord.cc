@@ -57,7 +57,7 @@ TraceRecord &TraceRecord::operator=(const TraceRecord &obj)
 bool TraceRecord::input(std::istream &in)
 {
     in >> m_cpu_idx;
-    in >> m_data_address;
+    in >> std::hex >> m_data_address;
     in >> m_pc_address;
     std::string type;
     if (!in.eof())

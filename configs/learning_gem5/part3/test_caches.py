@@ -63,6 +63,7 @@ class TestCacheSystem(RubySystem):
         """
         num_testers = tester.num_cpus
 
+
         # Ruby's global network.
         self.network = MyNetwork(self)
 
@@ -99,15 +100,10 @@ class TestCacheSystem(RubySystem):
         # Connect up the sequencers to the random tester
         for seq in self.sequencers:
             if seq.support_data_reqs and seq.support_inst_reqs:
-                tester.cpuInstDataPort = seq.slave
-            elif seq.support_data_reqs:
-                tester.cpuDataPort = seq.slave
-            elif seq.support_inst_reqs:
-                tester.cpuInstDataPort = seq.slave
-
+                tester.cpuPort = seq.slave
             # Do not automatically retry stalled Ruby requests
             seq.no_retry_on_stall = True
 
             # Tell each sequencer this is the ruby tester so that it
             # copies the subblock back to the checker
-            seq.using_ruby_tester = True
+            seq.using_ruby_tester = False
