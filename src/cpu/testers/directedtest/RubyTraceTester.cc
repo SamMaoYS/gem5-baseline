@@ -132,14 +132,19 @@ void RubyTraceTester::wakeup()
     if (m_requests_completed == m_requests_inflight)
     {
         m_file_descriptor.close();
-        exitSimLoop("Ruby TraceTester completed \
-        with %d requests",
-                    m_requests_inflight);
+        DPRINTF(DirectedTest, "Completed %d", m_requests_inflight);
+        exitSimLoop("Ruby TraceTester completed");
     }
 }
 
 bool RubyTraceTester::makerequest(const TraceRecord &entry)
 {
+    if (entry.m_cmd == MemCmd::MemFenceReq)
+    {
+        DPRINTF(DirectedTest, "Global Fence");
+        return false;
+    }
+
     DPRINTF(DirectedTest, "initiating request\n");
 
     RequestPort *port = getCpuPort(entry.m_cpu_idx);
