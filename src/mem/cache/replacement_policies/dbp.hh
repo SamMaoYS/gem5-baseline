@@ -8,19 +8,14 @@ struct DBPParams;
 class DBP : public BaseReplacementPolicy
 {
   protected:
-    /** MRU-specific implementation of replacement data. */
-    struct RandomReplData : ReplacementData
+    struct DeadBlockData : ReplacementData
     {
-        /**
-         * Flag informing if the replacement data is valid or not.
-         * Invalid entries are prioritized to be evicted.
-         */
-        bool valid;
+        bool dead;
 
         /**
          * Default constructor. Invalidate data.
          */
-        RandomReplData() : valid(false) {}
+        DeadBlockData() : dead(false) {}
     };
 
   public:
