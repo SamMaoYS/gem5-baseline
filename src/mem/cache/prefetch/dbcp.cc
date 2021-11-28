@@ -40,7 +40,7 @@ DBCP::HistoryEntry::updateSignature(const Addr addr, const Addr pc)
 }
 
 DBCP::DeadBlockEntry::DeadBlockEntry(const SatCounter& init_confidence)
-  : confidence(init_confidence)
+  : TaggedEntry(), confidence(init_confidence)
 {
     invalidate();
 }
@@ -65,7 +65,8 @@ DBCP::DBCP(const DBCPPrefetcherParams *p)
     initConfidence(p->confidence_counter_bits, p->initial_confidence),
     threshConf(p->confidence_threshold/100.0),
     historyTableSize(p->history_table_size),
-    deadBlockTableSize(p->deadBlock_table_size)
+    deadBlockTableInfo(p->deadblock_table_assoc, p->deadblock_table_entries, p->deadblock_table_indexing_policy,
+        p->deadblock_table_replacement_policy)
 {
 }
 
@@ -92,34 +93,47 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
 
     // Search for entry in history pc table
     HistoryEntry *history_entry = historyTable[hash(pf_addr, historyTableSize)];
+    Addr deadblock_indexing = pf_addr ^ encode(history_entry->signature, pc);
     int new_signature = history_entry->updateSignature(pf_addr, pc);
 
-    DeadBlockEntry *dead_block_entry = deadBlockTable[hash(pf_addr, historyTableSize)];
-    bool signature_match = (dead_block_entry->signature == new_signature);
+    DeadBlockEntry *dead_block_entry = deadBlockTable->findEntry(deadblock_indexing, is_secure);
+    if (dead_block_entry != nullptr) {
+        deadBlockTable->accessEntry(dead_block_entry);
 
-    if (signature_match && new_signature != 0) {
-        dead_block_entry->confidence++;
-    } else {
-        dead_block_entry->confidence--;
+        bool signature_match = (dead_block_entry->signature == new_signature);
+
+        if (signature_match && new_signature != 0) {
+            dead_block_entry->confidence++;
+        } else {
+            dead_block_entry->confidence--;
+            if (dead_block_entry->confidence.calcSaturation() < threshConf) {
+                dead_block_entry->signature = new_signature;
+            }
+        }
+
+        DPRINTF(HWPrefetch, "Hit: DBCP %x pkt_addr %x (%s) signature %d (%s), "
+                "conf %d\n", pc, pf_addr, is_secure ? "s" : "ns",
+                new_signature, signature_match ? "match" : "change",
+                (int)dead_block_entry->confidence);
+
         if (dead_block_entry->confidence.calcSaturation() < threshConf) {
-            dead_block_entry->signature = new_signature;
+            return;
+        }
+
+        if (signature_match && new_signature != 0) {
+            Addr new_addr = pf_addr + blkSize;
+            addresses.push_back(AddrPriority(new_addr, 0));
         }
     }
+    else {
+        // Miss in table
+        DPRINTF(HWPrefetch, "Miss: DBCP %x pkt_addr %x (%s)\n", pc, pf_addr,
+                is_secure ? "s" : "ns");
 
-    DPRINTF(HWPrefetch, "Hit: DBCP %x pkt_addr %x (%s) signature %d (%s), "
-            "conf %d\n", pc, pf_addr, is_secure ? "s" : "ns",
-            new_signature, signature_match ? "match" : "change",
-            (int)dead_block_entry->confidence);
+        DeadBlockEntry* entry = deadBlockTable->findVictim(deadblock_indexing);
 
-    if (dead_block_entry->confidence.calcSaturation() < threshConf) {
-        return;
-    }
-
-    if (signature_match && new_signature != 0) {
-        Addr new_addr = pf_addr + blkSize;
-        addresses.push_back(AddrPriority(new_addr, 0));
-
-        // TODO how to replace A2
+        // Insert new entry's data
+        deadBlockTable->insertEntry(deadblock_indexing, is_secure, entry);
     }
 }
 

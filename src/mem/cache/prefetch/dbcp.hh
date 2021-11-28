@@ -42,7 +42,7 @@ class DBCP : public Queued
     {
         HistoryEntry(const SatCounter& init_confidence);
 
-        void invalidate() override;
+        void invalidate();
 
         Addr updateSignature(const Addr addr, const Addr pc);
 
@@ -51,8 +51,26 @@ class DBCP : public Queued
     };
     std::vector<HistoryEntry> historyTable;
 
+    const struct DeadBlockTableInfo
+    {
+        const int assoc;
+        const int numEntries;
+
+        BaseIndexingPolicy* const indexingPolicy;
+        BaseReplacementPolicy* const replacementPolicy;
+
+        DeadBlockTableInfo(int assoc, int num_entries,
+            BaseIndexingPolicy* indexing_policy,
+            BaseReplacementPolicy* replacement_policy)
+          : assoc(assoc), numEntries(num_entries),
+            indexingPolicy(indexing_policy),
+            replacementPolicy(replacement_policy)
+        {
+        }
+    } deadBlockTableInfo;
+
     /** Hashed DeadBlocks. */
-    struct DeadBlockEntry
+    struct DeadBlockEntry : public TaggedEntry
     {
         DeadBlockEntry(const SatCounter& init_confidence);
 
@@ -64,13 +82,15 @@ class DBCP : public Queued
         Addr signature;
         SatCounter confidence;
     };
-    std::vector<DeadBlockEntry> deadBlockTable;
+    AssociativeSet<DeadBlockEntry> deadBlockTable;
 
     /** Generate a hash for the specified address to index the table
      *  @param addr: address to hash
      *  @param size: table size
      */
     unsigned int hash(Addr addr, unsigned int size) const;
+
+    Addr encode(Addr a, Addr b) const;
 
   public:
     DBCP(const DBCPPrefetcherParams *p);
