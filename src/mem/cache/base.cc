@@ -61,6 +61,8 @@
 #include "params/WriteAllocator.hh"
 #include "sim/core.hh"
 
+#include "mem/cache/optgen.hh"
+
 using namespace std;
 
 BaseCache::CacheResponsePort::CacheResponsePort(const std::string &_name,
@@ -1040,7 +1042,8 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
     // Access block in the tags
     Cycles tag_latency(0);
     blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), tag_latency);
-
+    if(blk != nullptr)
+        history.insert(blk->getSet(), blk->tag, history.predict(blk -> getSet(), blk->tag));
     DPRINTF(Cache, "%s for %s %s\n", __func__, pkt->print(),
             blk ? "hit " + blk->print() : "miss");
 
@@ -1136,6 +1139,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
                 incMissCount(pkt);
                 return false;
             }
+            history.insert(blk->getSet(), blk->tag, history.predict(blk -> getSet(), blk->tag));
 
             blk->status |= BlkReadable;
         } else if (compressor) {
@@ -1212,7 +1216,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
                     incMissCount(pkt);
                     return false;
                 }
-
+                history.insert(blk->getSet(), blk->tag, history.predict(blk -> getSet(), blk->tag));
                 blk->status |= BlkReadable;
             }
         } else if (compressor) {

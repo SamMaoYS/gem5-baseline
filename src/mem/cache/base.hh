@@ -75,6 +75,8 @@
 #include "sim/sim_exit.hh"
 #include "sim/system.hh"
 
+#include "mem/cache/optgen.hh"
+
 namespace Prefetcher {
     class Base;
 }
@@ -96,6 +98,8 @@ class BaseCache : public ClockedObject
         MSHRQueue_MSHRs,
         MSHRQueue_WriteBuffer
     };
+
+    OPTgenList history;
 
   public:
     /**

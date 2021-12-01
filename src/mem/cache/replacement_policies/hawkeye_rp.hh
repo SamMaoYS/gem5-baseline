@@ -37,11 +37,7 @@
 
 #include "mem/cache/replacement_policies/base.hh"
 #include "base/sat_counter.hh"
-#include <unordered_map>
-#define SET_CAP 10
-#define OPTGEN_CAP SET_CAP*8
-#define NUM_SET 10
-#define MAX_COUNTER_VAL 16
+#include "mem/cache/cache_blk.hh"
 
 struct HawkEyeRPParams;
 
@@ -60,20 +56,7 @@ class HawkEyeRP : public BaseReplacementPolicy
          */
         HawkEyeReplData(const int num_bits) : rrpv(num_bits), valid(false), memAddr(0) {}
     };
-    class OPTgen
-    {
-        protected:
-            uint64_t counters[OPTGEN_CAP];
-            std::unordered_map<Addr, uint64_t> lastAccessed;
-            uint64_t currentLocation;
-        public:
-            OPTgen();
-            ~OPTgen(){}
-            uint8_t predict(Addr memAddr);
-            void insert(Addr memAddr, uint8_t hasCapacity);
-            void reset();
-    };
-    OPTgen optgens[NUM_SET];
+
     const unsigned numRRPVBits;
   public:
     /** Convenience typedef. */
