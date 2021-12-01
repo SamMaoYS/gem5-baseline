@@ -37,10 +37,58 @@
 //#include "base/trace.hh"
 #include "debug/HWPrefetch.hh"
 
+HawkEyeRP::OPTgen::OPTgen(){
+    this -> reset();
+    //DPRINTF(HWPrefetch, "Constructor of HawkEye.\n");
+    
+}
+void
+HawkEyeRP::OPTgen::reset(){
+    for(int i = 0; i < OPTGEN_CAP; i++){
+        counters[i]=0;
+    }
+    currentLocation=0;
+    lastAccessed.clear();
+}
+
+uint8_t HawkEyeRP::OPTgen::predict(Addr memAddr){
+    if(lastAccessed.find(memAddr) == lastAccessed.end()){
+        return 0;
+    }
+    uint64_t i = lastAccessed[memAddr];
+    while(i != currentLocation){
+        if(counters[i] >= SET_CAP){
+            return 0;
+        }
+        i++;
+        i %= OPTGEN_CAP;
+    }
+    return 1;
+}
+
+void HawkEyeRP::OPTgen::insert(Addr memAddr, uint8_t hasCapacity){
+    if(lastAccessed.find(memAddr) != lastAccessed.end() && hasCapacity){
+        uint64_t i = lastAccessed[memAddr];
+        while(i != currentLocation){
+            counters[i]++;
+            if(counters[i]>=MAX_COUNTER_VAL){
+                counters[i]=MAX_COUNTER_VAL;
+            }
+            i++;
+            i %= OPTGEN_CAP;
+        }
+    }
+    counters[currentLocation]++;
+    currentLocation++;
+    currentLocation %= OPTGEN_CAP;
+    counters[currentLocation]=0;
+    lastAccessed[memAddr] = currentLocation;
+}
+
 HawkEyeRP::HawkEyeRP(const Params *p)
     : BaseReplacementPolicy(p), numRRPVBits(p->num_bits)
 {
-    //std::cout<<"Entering Hawkeye Replacement\nAbdelrahman\n";
+    std::cout<<"Entering Hawkeye Replacement\nAbdelrahman\n";
     fatal_if(numRRPVBits <= 0, "There should be at least one bit per RRPV.\n");
 }
 
@@ -48,7 +96,7 @@ void
 HawkEyeRP::invalidate(const std::shared_ptr<ReplacementData>& replacement_data)
 const
 {
-    //std::cout << "HawkEye invalidated" << std::endl;
+    std::cout << "HawkEye invalidated" << std::endl;
     std::shared_ptr<HawkEyeReplData> casted_replacement_data =
         std::static_pointer_cast<HawkEyeReplData>(replacement_data);
 
@@ -59,28 +107,38 @@ const
 void
 HawkEyeRP::touch(const std::shared_ptr<ReplacementData>& replacement_data) const
 {
-    //std::cout << "HawkEye touched" << std::endl;
+    std::cout << "HawkEye touched" << std::endl;
     std::shared_ptr<HawkEyeReplData> casted_replacement_data =
         std::static_pointer_cast<HawkEyeReplData>(replacement_data);
     uint8_t predict = 0; //dummy here. not sure how to invoke OPTgen
-    casted_replacement_data -> rrpv -= 7;
+    if (predict){
+        casted_replacement_data -> rrpv -= 7;
+    }
+    else{
+        casted_replacement_data -> rrpv += 7;
+    }
 }
 
 void
 HawkEyeRP::reset(const std::shared_ptr<ReplacementData>& replacement_data) const
 {
-    //std::cout << "HawkEye resetted" << std::endl;
+    std::cout << "HawkEye resetted" << std::endl;
     std::shared_ptr<HawkEyeReplData> casted_replacement_data =
         std::static_pointer_cast<HawkEyeReplData>(replacement_data);
     uint8_t predict = 0; //dummy here. not sure how to invoke OPTgen
-    casted_replacement_data -> rrpv -= 7;
+    if (predict){
+        casted_replacement_data -> rrpv -= 7;
+    }
+    else{
+        casted_replacement_data -> rrpv += 7;
+    }
     casted_replacement_data->valid = true;
 }
 
 ReplaceableEntry*
 HawkEyeRP::getVictim(const ReplacementCandidates& candidates) const
 {
-    //std::cout << "HawkEye getting victim" << std::endl;
+    std::cout << "HawkEye getting victim" << std::endl;
     // There must be at least one replacement candidate
     assert(candidates.size() > 0);
 
@@ -91,8 +149,6 @@ HawkEyeRP::getVictim(const ReplacementCandidates& candidates) const
     int victim_RRPV = std::static_pointer_cast<HawkEyeReplData>(
                         victim->replacementData)->rrpv;
     for (const auto& candidate : candidates) {
-        uint32_t candidate_set = candidate ->getSet();
-        Addr candidate_tag = (candidate);
         bool candidate_valid = std::static_pointer_cast<HawkEyeReplData>(
                         candidate->replacementData) ->valid;
         int candidate_RRPV = std::static_pointer_cast<HawkEyeReplData>(
@@ -124,12 +180,12 @@ HawkEyeRP::getVictim(const ReplacementCandidates& candidates) const
 std::shared_ptr<ReplacementData>
 HawkEyeRP::instantiateEntry()
 {
-    //std::cout << "HawkEye IE" << std::endl;
+    std::cout << "HawkEye IE" << std::endl;
     return std::shared_ptr<ReplacementData>(new HawkEyeReplData(numRRPVBits));
 }
 
 HawkEyeRP::~HawkEyeRP(){
-    //std::cout << "HawkEye exiting" << std::endl;
+    std::cout << "HawkEye exiting" << std::endl;
 }
 
 HawkEyeRP*
