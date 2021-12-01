@@ -38,9 +38,8 @@
 #include "mem/cache/replacement_policies/base.hh"
 #include "base/sat_counter.hh"
 #include <unordered_map>
-#define SET_CAP 10
+#define SET_CAP 2048
 #define OPTGEN_CAP SET_CAP*8
-#define NUM_SET 10
 #define MAX_COUNTER_VAL 16
 
 struct HawkEyeRPParams;
@@ -54,26 +53,30 @@ class HawkEyeRP : public BaseReplacementPolicy
         /** Whether the entry is valid. */
         bool valid;
         SatCounter rrpv;
-        Addr memAddr;
+        uint32_t set;
+        uint32_t way;
+        Addr tag; // Reserved. Not used
         /**
          * Default constructor. Invalidate data.
          */
-        HawkEyeReplData(const int num_bits) : rrpv(num_bits), valid(false), memAddr(0) {}
+        HawkEyeReplData(const int num_bits) :
+          rrpv(num_bits), valid(false), set(0), way(0), tag(0) {}
     };
     class OPTgen
     {
         protected:
             uint64_t counters[OPTGEN_CAP];
-            std::unordered_map<Addr, uint64_t> lastAccessed;
+            std::unordered_map<uint32_t, uint64_t> lastAccessed;
             uint64_t currentLocation;
         public:
             OPTgen();
             ~OPTgen(){}
-            uint8_t predict(Addr memAddr);
-            void insert(Addr memAddr, uint8_t hasCapacity);
+            uint8_t predict(uint32_t way);
+            void insert(uint32_t way, uint8_t hasCapacity);
             void reset();
+            void remove(uint32_t way);
     };
-    OPTgen optgens[NUM_SET];
+    OPTgen optgens[SET_CAP];
     const unsigned numRRPVBits;
   public:
     /** Convenience typedef. */
