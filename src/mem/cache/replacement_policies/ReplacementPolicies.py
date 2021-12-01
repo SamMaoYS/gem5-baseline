@@ -99,3 +99,9 @@ class WeightedLRURP(BaseReplacementPolicy):
     type = "WeightedLRURP"
     cxx_class = "WeightedLRUPolicy"
     cxx_header = "mem/cache/replacement_policies/weighted_lru_rp.hh"
+
+class HawkEyeRP(BaseReplacementPolicy):
+    type = "HawkEyeRP"
+    cxx_class = "HawkEyeRP"
+    cxx_header = "mem/cache/replacement_policies/hawkeye_rp.hh"
+    num_bits = Param.Int(3, "Number of bits per RRPV")
