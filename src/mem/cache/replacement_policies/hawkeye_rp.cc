@@ -55,7 +55,7 @@ uint8_t HawkEyeRP::OPTgen::predict(uint32_t memAddr){
     }
     uint64_t i = lastAccessed[memAddr];
     while(i != currentLocation){
-        if(counters[i] >= SET_CAP){
+        if (counters[i] >= MAX_COUNTER_VAL){
             return 0;
         }
         i++;
@@ -144,8 +144,9 @@ HawkEyeRP::reset(
     uint32_t way = casted_replacement_data -> way;
     OPTgen* currentOPTgen = (OPTgen*)(&optgens[set]);
     currentOPTgen -> remove(way);
+    currentOPTgen -> insert(way, 0);
     // At the beginning, all blocks are cache adverse
-    casted_replacement_data -> rrpv -= 7;
+    casted_replacement_data -> rrpv += 7;
     casted_replacement_data -> valid = true;
 
     std::cout << "Inserting at set: " << set << " way: " << way << std::endl;
