@@ -42,7 +42,7 @@ HawkEyeRP::OPTgen::OPTgen(){
 }
 void
 HawkEyeRP::OPTgen::reset(){
-    for(int i = 0; i < OPTGEN_CAP; i++){
+    for (int i = 0; i < HISTORY_SIZE; i++){
         counters[i]=0;
     }
     currentLocation=0;
@@ -54,12 +54,12 @@ uint8_t HawkEyeRP::OPTgen::predict(uint32_t memAddr){
         return 0;
     }
     uint64_t i = lastAccessed[memAddr];
-    while(i != currentLocation){
-        if (counters[i] >= MAX_COUNTER_VAL){
+    while (i != currentLocation){
+        if (counters[i] >= TOTAL_WAY){
             return 0;
         }
         i++;
-        i %= OPTGEN_CAP;
+        i %= HISTORY_SIZE;
     }
     return 1;
 }
@@ -69,16 +69,16 @@ void HawkEyeRP::OPTgen::insert(uint32_t memAddr, uint8_t hasCapacity){
         uint64_t i = lastAccessed[memAddr];
         while(i != currentLocation){
             counters[i]++;
-            if(counters[i]>=MAX_COUNTER_VAL){
-                counters[i]=MAX_COUNTER_VAL;
+            if (counters[i]>=TOTAL_WAY){
+                counters[i]=TOTAL_WAY;
             }
             i++;
-            i %= OPTGEN_CAP;
+            i %= HISTORY_SIZE;
         }
     }
     counters[currentLocation]++;
     currentLocation++;
-    currentLocation %= OPTGEN_CAP;
+    currentLocation %= HISTORY_SIZE;
     counters[currentLocation]=0;
     lastAccessed[memAddr] = currentLocation;
 }
