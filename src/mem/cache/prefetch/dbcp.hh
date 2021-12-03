@@ -23,6 +23,8 @@ class BaseIndexingPolicy;
 class BaseReplacementPolicy;
 struct DBCPPrefetcherParams;
 
+extern Addr replace_adress;
+
 namespace Prefetcher {
 
 class DBCP : public Queued

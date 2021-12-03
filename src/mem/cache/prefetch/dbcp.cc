@@ -11,6 +11,8 @@
 #include "mem/cache/replacement_policies/base.hh"
 #include "params/DBCPPrefetcher.hh"
 
+Addr replace_adress;
+
 namespace Prefetcher {
 
 DBCP::HistoryEntry::HistoryEntry(const SatCounter& init_confidence)
@@ -31,11 +33,9 @@ DBCP::HistoryEntry::updateSignature(const Addr addr, const Addr pc)
 {
     auto insert_result = prior_addresses.insert(addr);
     // address not int the set
+    signature = encode(signature, pc);
     if (insert_result.second) {
-        signature = signature ^ addr ^ pc;
-    }
-    else {
-        signature = signature ^ pc;
+        signature = encode(signature, addr);
     }
 }
 
@@ -72,7 +72,14 @@ DBCP::DBCP(const DBCPPrefetcherParams *p)
 
 unsigned int DBCP::hash(Addr addr, unsigned int size) const
 {
+    addr = (addr ^ (addr >> 30)) * UINT64_C(0xbf58476d1ce4e5b9);
+    addr = (addr ^ (addr >> 27)) * UINT64_C(0x94d049bb133111eb);
+    addr = addr ^ (addr >> 31);
     return addr % size;
+}
+
+Addr DBCP::encode(Addr a, Addr b) const {
+    return ((a+b) >> (sizeof(a)*8 - 12));
 }
 
 void
@@ -123,6 +130,7 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
         if (signature_match && new_signature != 0) {
             Addr new_addr = pf_addr + blkSize;
             addresses.push_back(AddrPriority(new_addr, 0));
+            replace_adress = pfi.paddress();
         }
     }
     else {
