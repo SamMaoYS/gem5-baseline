@@ -36,26 +36,52 @@
 #include "sim/core.hh"
 //#include "base/trace.hh"
 #include "debug/HWPrefetch.hh"
+#include "mem/cache/cache_blk.hh"
 
-HawkEyeRP::OPTgen::OPTgen(){
-    this -> reset();
+HawkEyeRP::OPTgen::OPTgen()
+{
+    this->reset();
 }
-void
-HawkEyeRP::OPTgen::reset(){
-    for (int i = 0; i < HISTORY_SIZE; i++){
-        counters[i]=0;
+void HawkEyeRP::OPTgen::reset()
+{
+    for (int i = 0; i < HISTORY_SIZE; i++)
+    {
+        counters[i] = 0;
     }
-    currentLocation=0;
+    currentLocation = 0;
     lastAccessed.clear();
 }
 
-uint8_t HawkEyeRP::OPTgen::predict(uint32_t memAddr){
-    if (lastAccessed.find(memAddr) == lastAccessed.end()){
+uint8_t HawkEyeRP::OPTgen::predict(uint32_t memAddr)
+{
+    if (lastAccessed.find(memAddr) == lastAccessed.end())
+    {
         return 0;
     }
     uint64_t i = lastAccessed[memAddr];
-    while (i != currentLocation){
-        if (counters[i] >= TOTAL_WAY){
+    // std::cout << "We're looking at potision between "
+    // << (currentLocation+1)%(HISTORY_SIZE) << " and " << i << "[";
+    // uint64_t j = currentLocation;
+    // for (int i = 0; i < 10; i++)
+    // {
+    //     std::cout << counters[j] << " ";
+    //     if (j > 0)
+    //     {
+    //         j--;
+    //     }
+    //     else
+    //     {
+    //         j = HISTORY_SIZE - 1;
+    //     }
+    // }
+    // std::cout << "]" << std::endl;
+    while (i != (currentLocation+1)%(HISTORY_SIZE))
+    {
+        //std::cout << i << ' ';
+        if (counters[i] >= TOTAL_WAY)
+        {
+            //std::cout << "counter["<< i << "] is at capacity! "
+            // <<"with value " << counters[i] << std::endl;
             return 0;
         }
         i++;
@@ -64,27 +90,59 @@ uint8_t HawkEyeRP::OPTgen::predict(uint32_t memAddr){
     return 1;
 }
 
-void HawkEyeRP::OPTgen::insert(uint32_t memAddr, uint8_t hasCapacity){
-    if (lastAccessed.find(memAddr) != lastAccessed.end() && hasCapacity){
+void HawkEyeRP::OPTgen::insert(uint32_t memAddr, uint8_t hasCapacity)
+{
+    currentLocation++;
+    currentLocation %= HISTORY_SIZE;
+    counters[currentLocation] = 0;
+    // std::cout << "The history before update is [";
+    // uint64_t j = currentLocation;
+    // for (int i = 0; i < 10; i++){
+    //     std:: cout << counters[j] << " ";
+    //     if (j>0){
+    //         j--;
+    //     }
+    //     else{
+    //         j = HISTORY_SIZE-1;
+    //     }
+    // }
+    // std::cout << "]" << std::endl;
+    // std::cout << "current location is :" << currentLocation << std::endl;
+    if (lastAccessed.find(memAddr) != lastAccessed.end() && hasCapacity)
+    {
         uint64_t i = lastAccessed[memAddr];
-        while(i != currentLocation){
+        //std::cout << "update from " << i << std::endl;
+        while (i != currentLocation)
+        {
             counters[i]++;
-            if (counters[i]>=TOTAL_WAY){
-                counters[i]=TOTAL_WAY;
+            if (counters[i] >= TOTAL_WAY)
+            {
+                counters[i] = TOTAL_WAY;
+                //lastFullLocation = i;
             }
             i++;
             i %= HISTORY_SIZE;
         }
     }
-    counters[currentLocation]++;
-    currentLocation++;
-    currentLocation %= HISTORY_SIZE;
-    counters[currentLocation]=0;
     lastAccessed[memAddr] = currentLocation;
+    // std::cout << "The history after update is [";
+    // j = currentLocation;
+    // for (int i = 0; i < 10; i++){
+    //     std:: cout << counters[j] << " ";
+    //     if (j>0){
+    //         j--;
+    //     }
+    //     else{
+    //         j = HISTORY_SIZE-1;
+    //     }
+    // }
+    // std::cout << "]" << std::endl;
 }
 
-void HawkEyeRP::OPTgen::remove(uint32_t way){
-    if (lastAccessed.find(way) == lastAccessed.end()){
+void HawkEyeRP::OPTgen::remove(uint32_t way)
+{
+    if (lastAccessed.find(way) == lastAccessed.end())
+    {
         return;
     }
     lastAccessed.erase(way);
@@ -97,112 +155,140 @@ HawkEyeRP::HawkEyeRP(const Params *p)
 }
 
 void
-HawkEyeRP::invalidate(const std::shared_ptr<ReplacementData>& replacement_data)
-const
+HawkEyeRP::invalidate(const std::shared_ptr<ReplacementData> &replacement_data)
+    const
 {
     std::shared_ptr<HawkEyeReplData> casted_replacement_data =
         std::static_pointer_cast<HawkEyeReplData>(replacement_data);
-    uint32_t set = casted_replacement_data -> set;
-    uint32_t way = casted_replacement_data -> way;
-    OPTgen* currentOPTgen = (OPTgen*)(&optgens[set]);
+    uint32_t set = casted_replacement_data->set;
+    uint32_t way = casted_replacement_data->way;
+    OPTgen *currentOPTgen = (OPTgen *)(&optgens[set]);
     // Clear this block from OPTgen to prevent data mishandling
-    currentOPTgen -> remove(way);
+    currentOPTgen->remove(way);
     // Invalidate entry
     casted_replacement_data->valid = false;
-    std::cout << "Invalidating set: " << set << " way: " << way << std::endl;
+    // std::cout << "Invalidating set: "
+    // << set << " way: " << way << std::endl;
 }
 
 void
-HawkEyeRP::touch(const std::shared_ptr<ReplacementData>& replacement_data) const
+HawkEyeRP::touch(const std::shared_ptr<ReplacementData> &replacement_data)
+    const
 {
     std::shared_ptr<HawkEyeReplData> casted_replacement_data =
         std::static_pointer_cast<HawkEyeReplData>(replacement_data);
-    uint32_t set = casted_replacement_data -> set;
-    uint32_t way = casted_replacement_data -> way;
-    OPTgen* currentOPTgen = (OPTgen*)(&optgens[set]);
-    uint8_t predict = currentOPTgen -> predict(way);
-    if (predict){
-        casted_replacement_data -> rrpv -= 7;
+    uint32_t set = casted_replacement_data->set;
+    uint32_t way = casted_replacement_data->way;
+    OPTgen *currentOPTgen = (OPTgen *)(&optgens[set]);
+    uint8_t predict = currentOPTgen->predict(way);
+    if (predict)
+    {
+        casted_replacement_data->rrpv -= 7;
     }
-    else{
-        casted_replacement_data -> rrpv += 7;
+    else
+    {
+        casted_replacement_data->rrpv += 7;
     }
-    currentOPTgen -> insert(way, predict);
+    currentOPTgen->insert(way, predict);
 
-    std::cout << "Touching set: " << set <<
-        " way: " << way << " with predicted result "
-        << (int)(predict) << std::endl;
+    // std::cout << "Touching set: " << set <<
+    //     " way: " << way << " with predicted result "
+    //     << (int)(predict) << std::endl;
 }
 
-void
-HawkEyeRP::reset(
-    const std::shared_ptr<ReplacementData>& replacement_data) const
+void HawkEyeRP::reset(
+    const std::shared_ptr<ReplacementData> &replacement_data) const
 {
     std::shared_ptr<HawkEyeReplData> casted_replacement_data =
         std::static_pointer_cast<HawkEyeReplData>(replacement_data);
-    uint32_t set = casted_replacement_data -> set;
-    uint32_t way = casted_replacement_data -> way;
-    OPTgen* currentOPTgen = (OPTgen*)(&optgens[set]);
-    currentOPTgen -> remove(way);
-    currentOPTgen -> insert(way, 0);
+    uint32_t set = casted_replacement_data->set;
+    uint32_t way = casted_replacement_data->way;
+    OPTgen *currentOPTgen = (OPTgen *)(&optgens[set]);
+    currentOPTgen->remove(way);
+    currentOPTgen->insert(way, 0);
     // At the beginning, all blocks are cache adverse
-    casted_replacement_data -> rrpv += 7;
-    casted_replacement_data -> valid = true;
+    casted_replacement_data->rrpv += 7;
+    casted_replacement_data->valid = true;
 
-    std::cout << "Inserting at set: " << set << " way: " << way << std::endl;
+    //std::cout << "Inserting at set: " << set << " way: " << way << std::endl;
 }
 
-ReplaceableEntry*
-HawkEyeRP::getVictim(const ReplacementCandidates& candidates) const
+ReplaceableEntry *
+HawkEyeRP::getVictim(const ReplacementCandidates &candidates) const
 {
     // There must be at least one replacement candidate
     assert(candidates.size() > 0);
     // Update all the replacement data's set and way value
     // per Prof's suggestion
-    for (const auto& candidate : candidates) {
+    for (const auto &candidate : candidates)
+    {
         std::static_pointer_cast<HawkEyeReplData>(
-                        candidate->replacementData) -> set =
-                        candidate -> getSet();
+            candidate->replacementData)
+            ->set =
+            candidate->getSet();
         std::static_pointer_cast<HawkEyeReplData>(
-                        candidate->replacementData) -> way =
-                        candidate -> getWay();
+            candidate->replacementData)
+            ->way =
+            candidate->getWay();
+        std::static_pointer_cast<HawkEyeReplData>(
+            candidate->replacementData)
+            ->tag = ((CacheBlk *)(candidate))->tag;
     }
     // Visit all candidates to find victim
-    ReplaceableEntry* victim = candidates[0];
+    ReplaceableEntry *victim = candidates[0];
 
     // Store victim->rrpv in a variable to improve code readability
     int victim_RRPV = std::static_pointer_cast<HawkEyeReplData>(
-                        victim->replacementData)->rrpv;
-    for (const auto& candidate : candidates) {
+                          victim->replacementData)
+                          ->rrpv;
+    for (const auto &candidate : candidates)
+    {
         bool candidate_valid = std::static_pointer_cast<HawkEyeReplData>(
-                        candidate->replacementData) ->valid;
+                                   candidate->replacementData)
+                                   ->valid;
         int candidate_RRPV = std::static_pointer_cast<HawkEyeReplData>(
-                        candidate->replacementData)->rrpv;
+                                 candidate->replacementData)
+                                 ->rrpv;
         // Stop searching for victims if an invalid entry is found.
         // As no cache miss happens, no need to increase other rrpvs
-        if (!candidate_valid) {
-            return candidate;
+        if (!candidate_valid)
+        {
+            // std::cout << "inserting at an empty location" << std::endl;
+            victim = candidate;
+            break;
         }
-
         // Update victim entry if necessary (highest RRPV or RRPV = 7)
-        if (victim_RRPV < candidate_RRPV || candidate_RRPV==7) {
+        if (victim_RRPV < candidate_RRPV || candidate_RRPV == 7)
+        {
             victim = candidate;
             victim_RRPV = candidate_RRPV;
         }
+        // if (candidate_RRPV==7){
+        //     std::cout << "find a cache adverse line! ";
+        // }
+        // if (candidate_RRPV > 7){
+        //     std::cout << "RRPV is NOT valid!" << std::endl;
+        // }
     }
 
-    for (const auto& candidate : candidates) {
-        std::shared_ptr<HawkEyeReplData> casted_replacement_data =
-            std::static_pointer_cast<HawkEyeReplData>(candidate->replacementData);
-        if(casted_replacement_data->rrpv <7){
-            casted_replacement_data->rrpv+=1;
+    for (const auto &candidate : candidates)
+    {
+        int candidate_RRPV = std::static_pointer_cast<HawkEyeReplData>(
+                                 candidate->replacementData)
+                                 ->rrpv;
+
+        if (candidate_RRPV < 6)
+        {
+            std::static_pointer_cast<HawkEyeReplData>(
+                candidate->replacementData)
+                ->rrpv++;
         }
     }
-    std::cout << "replacing set: " <<
-        std::static_pointer_cast<HawkEyeReplData>(
-        victim->replacementData) -> set <<
-        " way: " << std::static_pointer_cast<HawkEyeReplData>(
-            victim->replacementData) -> way << std::endl;
+    // std::cout << "replacing set: " <<
+    //     std::static_pointer_cast<HawkEyeReplData>(
+    //     victim->replacementData) -> set <<
+    //     " way: " << std::static_pointer_cast<HawkEyeReplData>(
+    //         victim->replacementData) -> way << std::endl;
     return victim;
 }
 
@@ -212,10 +298,11 @@ HawkEyeRP::instantiateEntry()
     return std::shared_ptr<ReplacementData>(new HawkEyeReplData(numRRPVBits));
 }
 
-HawkEyeRP::~HawkEyeRP(){
+HawkEyeRP::~HawkEyeRP()
+{
 }
 
-HawkEyeRP*
+HawkEyeRP *
 HawkEyeRPParams::create()
 {
     return new HawkEyeRP(this);

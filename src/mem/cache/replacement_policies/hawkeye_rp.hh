@@ -40,7 +40,7 @@
 #include <unordered_map>
 #define TOTAL_SET 1024 // Equal to size of cache in KB
 #define HISTORY_SIZE TOTAL_SET*8
-#define TOTAL_WAY 16 // assoc
+#define TOTAL_WAY 1 // assoc
 
 struct HawkEyeRPParams;
 
@@ -68,6 +68,7 @@ class HawkEyeRP : public BaseReplacementPolicy
             uint64_t counters[HISTORY_SIZE];
             std::unordered_map<uint32_t, uint64_t> lastAccessed;
             uint64_t currentLocation;
+            uint64_t lastFullLocation;
         public:
             OPTgen();
             ~OPTgen(){}
