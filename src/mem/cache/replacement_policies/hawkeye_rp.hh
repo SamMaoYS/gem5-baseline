@@ -56,6 +56,7 @@ class HawkEyeRP : public BaseReplacementPolicy
         uint32_t set;
         uint32_t way;
         Addr tag; // Reserved. Not used
+        uint8_t data;
         /**
          * Default constructor. Invalidate data.
          */
@@ -72,10 +73,10 @@ class HawkEyeRP : public BaseReplacementPolicy
         public:
             OPTgen();
             ~OPTgen(){}
-            uint8_t predict(uint32_t way);
-            void insert(uint32_t way, uint8_t hasCapacity);
+            uint8_t predict(uint32_t);
+            void insert(uint32_t, uint8_t hasCapacity);
             void reset();
-            void remove(uint32_t way);
+            void remove(uint32_t);
     };
     OPTgen optgens[TOTAL_SET];
     const unsigned numRRPVBits;

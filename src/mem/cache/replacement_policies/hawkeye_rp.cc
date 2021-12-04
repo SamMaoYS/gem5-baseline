@@ -152,6 +152,7 @@ HawkEyeRP::HawkEyeRP(const Params *p)
     : BaseReplacementPolicy(p), numRRPVBits(p->num_bits)
 {
     fatal_if(numRRPVBits <= 0, "There should be at least one bit per RRPV.\n");
+    std::cout << "Initializing HawkEye Replacement Policy..." << std::endl;
 }
 
 void
