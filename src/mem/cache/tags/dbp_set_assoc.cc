@@ -43,13 +43,13 @@
  * Definitions of a conventional tag store.
  */
 
-#include "mem/cache/tags/base_set_assoc.hh"
+#include "mem/cache/tags/dbp_set_assoc.hh"
 
 #include <string>
 
 #include "base/intmath.hh"
 
-BaseSetAssoc::BaseSetAssoc(const Params *p)
+DBPSetAssoc::DBPSetAssoc(const Params *p)
     :BaseTags(p), allocAssoc(p->assoc), blks(p->size / p->block_size),
      sequentialAccess(p->sequential_access),
      replacementPolicy(p->replacement_policy)
@@ -61,7 +61,7 @@ BaseSetAssoc::BaseSetAssoc(const Params *p)
 }
 
 void
-BaseSetAssoc::tagsInit()
+DBPSetAssoc::tagsInit()
 {
     // Initialize all blocks
     for (unsigned blk_index = 0; blk_index < numBlocks; blk_index++) {
@@ -80,7 +80,7 @@ BaseSetAssoc::tagsInit()
 }
 
 void
-BaseSetAssoc::invalidate(CacheBlk *blk)
+DBPSetAssoc::invalidate(CacheBlk *blk)
 {
     BaseTags::invalidate(blk);
 
@@ -91,11 +91,11 @@ BaseSetAssoc::invalidate(CacheBlk *blk)
     replacementPolicy->invalidate(blk->replacementData);
 }
 
-BaseSetAssoc *
-BaseSetAssocParams::create()
+DBPSetAssoc *
+DBPSetAssocParams::create()
 {
     // There must be a indexing policy
     fatal_if(!indexing_policy, "An indexing policy is required");
 
-    return new BaseSetAssoc(this);
+    return new DBPSetAssoc(this);
 }

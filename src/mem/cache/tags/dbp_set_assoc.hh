@@ -189,6 +189,20 @@ class DBPSetAssoc : public BaseTags
         evict_blks.push_back(victim);
 
         return victim;
+
+        // // Get possible entries to be victimized
+        // const std::vector<ReplaceableEntry*> entries =
+        //     indexingPolicy->getPossibleEntries(addr);
+
+        // // Choose replacement victim from replacement candidates
+        // CacheBlk* victim =
+        // static_cast<CacheBlk*>(replacementPolicy->getVictim(
+        //                         entries));
+
+        // // There is only one eviction for this replacement
+        // evict_blks.push_back(victim);
+
+        // return victim;
     }
 
     /**

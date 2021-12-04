@@ -15,8 +15,7 @@ Addr replace_adress;
 
 namespace Prefetcher {
 
-DBCP::HistoryEntry::HistoryEntry(const SatCounter& init_confidence)
-  : confidence(init_confidence)
+DBCP::HistoryEntry::HistoryEntry()
 {
     invalidate();
 }
@@ -37,6 +36,7 @@ DBCP::HistoryEntry::updateSignature(const Addr addr, const Addr pc)
     if (insert_result.second) {
         signature = encode(signature, addr);
     }
+    return signature;
 }
 
 DBCP::DeadBlockEntry::DeadBlockEntry(const SatCounter& init_confidence)
@@ -65,12 +65,15 @@ DBCP::DBCP(const DBCPPrefetcherParams *p)
     initConfidence(p->confidence_counter_bits, p->initial_confidence),
     threshConf(p->confidence_threshold/100.0),
     historyTableSize(p->history_table_size),
-    deadBlockTableInfo(p->deadblock_table_assoc, p->deadblock_table_entries, p->deadblock_table_indexing_policy,
-        p->deadblock_table_replacement_policy)
+    deadBlockTable(p->deadblock_table_assoc, p->deadblock_table_entries,
+                  p->deadblock_table_indexing_policy,
+                  p->deadblock_table_replacement_policy,
+                  DeadBlockEntry(initConfidence))
 {
+    historyTable.resize(historyTableSize);
 }
 
-unsigned int DBCP::hash(Addr addr, unsigned int size) const
+unsigned int DBCP::hash(Addr addr, unsigned int size)
 {
     addr = (addr ^ (addr >> 30)) * UINT64_C(0xbf58476d1ce4e5b9);
     addr = (addr ^ (addr >> 27)) * UINT64_C(0x94d049bb133111eb);
@@ -78,7 +81,7 @@ unsigned int DBCP::hash(Addr addr, unsigned int size) const
     return addr % size;
 }
 
-Addr DBCP::encode(Addr a, Addr b) const {
+Addr DBCP::encode(Addr a, Addr b) {
     return ((a+b) >> (sizeof(a)*8 - 12));
 }
 
@@ -96,16 +99,16 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
     Addr pc = pfi.getPC();
     bool is_secure = pfi.isSecure();
 
-    hash(pf_addr, historyTableSize)
-
     // Search for entry in history pc table
-    HistoryEntry *history_entry = historyTable[hash(pf_addr, historyTableSize)];
-    Addr deadblock_indexing = pf_addr ^ encode(history_entry->signature, pc);
-    int new_signature = history_entry->updateSignature(pf_addr, pc);
+    HistoryEntry history_entry = historyTable[hash(pf_addr, historyTableSize)];
+    Addr deadblock_indexing = pf_addr ^ encode(history_entry.signature, pc);
+    int new_signature = history_entry.updateSignature(pf_addr, pc);
 
-    DeadBlockEntry *dead_block_entry = deadBlockTable->findEntry(deadblock_indexing, is_secure);
+    DeadBlockEntry *dead_block_entry =
+        deadBlockTable.findEntry(deadblock_indexing, is_secure);
+
     if (dead_block_entry != nullptr) {
-        deadBlockTable->accessEntry(dead_block_entry);
+        deadBlockTable.accessEntry(dead_block_entry);
 
         bool signature_match = (dead_block_entry->signature == new_signature);
 
@@ -130,7 +133,7 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
         if (signature_match && new_signature != 0) {
             Addr new_addr = pf_addr + blkSize;
             addresses.push_back(AddrPriority(new_addr, 0));
-            replace_adress = pfi.paddress();
+            replace_adress = blockAddress(pf_addr);
         }
     }
     else {
@@ -138,10 +141,10 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
         DPRINTF(HWPrefetch, "Miss: DBCP %x pkt_addr %x (%s)\n", pc, pf_addr,
                 is_secure ? "s" : "ns");
 
-        DeadBlockEntry* entry = deadBlockTable->findVictim(deadblock_indexing);
+        DeadBlockEntry* entry = deadBlockTable.findVictim(deadblock_indexing);
 
         // Insert new entry's data
-        deadBlockTable->insertEntry(deadblock_indexing, is_secure, entry);
+        deadBlockTable.insertEntry(deadblock_indexing, is_secure, entry);
     }
 }
 

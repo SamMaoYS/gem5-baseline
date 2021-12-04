@@ -17,7 +17,6 @@
 #include "mem/cache/replacement_policies/replaceable_entry.hh"
 #include "mem/cache/tags/indexing_policies/set_associative.hh"
 #include "mem/packet.hh"
-#include "params/DBCPPrefetcherHashedSetAssociative.hh"
 
 class BaseIndexingPolicy;
 class BaseReplacementPolicy;
@@ -31,7 +30,6 @@ class DBCP : public Queued
 {
   protected:
     const unsigned int historyTableSize;
-    const unsigned int deadBlockTableSize;
 
     /** Initial confidence counter value for the pc tables. */
     const SatCounter initConfidence;
@@ -42,7 +40,7 @@ class DBCP : public Queued
     /** Hashed history table */
     struct HistoryEntry
     {
-        HistoryEntry(const SatCounter& init_confidence);
+        HistoryEntry();
 
         void invalidate();
 
@@ -53,24 +51,6 @@ class DBCP : public Queued
     };
     std::vector<HistoryEntry> historyTable;
 
-    const struct DeadBlockTableInfo
-    {
-        const int assoc;
-        const int numEntries;
-
-        BaseIndexingPolicy* const indexingPolicy;
-        BaseReplacementPolicy* const replacementPolicy;
-
-        DeadBlockTableInfo(int assoc, int num_entries,
-            BaseIndexingPolicy* indexing_policy,
-            BaseReplacementPolicy* replacement_policy)
-          : assoc(assoc), numEntries(num_entries),
-            indexingPolicy(indexing_policy),
-            replacementPolicy(replacement_policy)
-        {
-        }
-    } deadBlockTableInfo;
-
     /** Hashed DeadBlocks. */
     struct DeadBlockEntry : public TaggedEntry
     {
@@ -78,7 +58,7 @@ class DBCP : public Queued
 
         void invalidate() override;
 
-        Addr updateSignature(const Addr addr, const Addr pc);
+        Addr updateSignature(const Addr new_signature);
 
         Addr prediction;
         Addr signature;
@@ -90,12 +70,12 @@ class DBCP : public Queued
      *  @param addr: address to hash
      *  @param size: table size
      */
-    unsigned int hash(Addr addr, unsigned int size) const;
-
-    Addr encode(Addr a, Addr b) const;
+    unsigned int hash(Addr addr, unsigned int size);
 
   public:
     DBCP(const DBCPPrefetcherParams *p);
+
+    static Addr encode(Addr a, Addr b);
 
     void calculatePrefetch(const PrefetchInfo &pfi,
                            std::vector<AddrPriority> &addresses) override;
