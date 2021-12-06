@@ -95,8 +95,6 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
         return;
     }
 
-    std::cout << "calcprefetch" << std::endl;
-
     // Get required packet info
     Addr pf_addr = pfi.getAddr();
     Addr pc = pfi.getPC();
@@ -162,7 +160,6 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
 
         // Insert new entry's data
         deadBlockTable.insertEntry(deadblock_indexing, is_secure, entry);
-        std::cout << "calcprefetch miss" << std::endl;
     }
 }
 
