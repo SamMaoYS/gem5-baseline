@@ -172,6 +172,10 @@ Queued::notify(const PacketPtr &pkt, const PrefetchInfo &pfi)
     size_t num_pfs = 0;
     for (AddrPriority& addr_prio : addresses) {
 
+        if (inCache(pkt->req->getPaddr(), pfi.isSecure())) {
+            std::cout << "pkt in cache" << pkt->req->getPaddr() << std::endl;
+        }
+
         // Block align prefetch address
         addr_prio.first = blockAddress(addr_prio.first);
 
