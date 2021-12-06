@@ -142,7 +142,7 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
             // replace_adress = blockAddress(pf_addr);
             if (cache) {
                 std::cout << "cache is valid pointer" << std::endl;
-                CacheBlk *blk = cache->tags->findBlock(block_addr, is_secure);
+                CacheBlk *blk = cache->tags->findBlock(pf_addr, is_secure);
                 if (blk) {
                     cache->invalidateBlock(blk);
                     std::cout << "block is set to be replaced" <<
