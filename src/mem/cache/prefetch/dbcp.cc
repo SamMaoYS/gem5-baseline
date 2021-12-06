@@ -7,6 +7,7 @@
 #include "base/random.hh"
 #include "base/trace.hh"
 #include "debug/HWPrefetch.hh"
+#include "mem/cache/base.hh"
 #include "mem/cache/prefetch/associative_set_impl.hh"
 #include "mem/cache/replacement_policies/base.hh"
 #include "params/DBCPPrefetcher.hh"
@@ -82,7 +83,7 @@ unsigned int DBCP::hash(Addr addr, unsigned int size)
 }
 
 Addr DBCP::encode(Addr a, Addr b) {
-    return ((a+b) >> (sizeof(a)*8 - 12));
+    return ((a+b) & ((1 << 12) -1));
 }
 
 void
@@ -94,15 +95,19 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
         return;
     }
 
+    std::cout << "calcprefetch" << std::endl;
+
     // Get required packet info
     Addr pf_addr = pfi.getAddr();
     Addr pc = pfi.getPC();
     bool is_secure = pfi.isSecure();
+    Addr block_addr = blockAddress(pf_addr);
 
     // Search for entry in history pc table
-    HistoryEntry history_entry = historyTable[hash(pf_addr, historyTableSize)];
-    Addr deadblock_indexing = pf_addr ^ encode(history_entry.signature, pc);
-    int new_signature = history_entry.updateSignature(pf_addr, pc);
+    HistoryEntry history_entry = historyTable[hash(block_addr,
+        historyTableSize)];
+    Addr deadblock_indexing = block_addr ^ encode(history_entry.signature, pc);
+    int new_signature = history_entry.updateSignature(block_addr, pc);
 
     DeadBlockEntry *dead_block_entry =
         deadBlockTable.findEntry(deadblock_indexing, is_secure);
@@ -114,6 +119,7 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
 
         if (signature_match && new_signature != 0) {
             dead_block_entry->confidence++;
+            std::cout << "match" << std::endl;
         } else {
             dead_block_entry->confidence--;
             if (dead_block_entry->confidence.calcSaturation() < threshConf) {
@@ -127,13 +133,18 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
                 (int)dead_block_entry->confidence);
 
         if (dead_block_entry->confidence.calcSaturation() < threshConf) {
+            std::cout << "confidence is not enough" <<
+                dead_block_entry->confidence.calcSaturation() << std::endl;
             return;
         }
 
         if (signature_match && new_signature != 0) {
             Addr new_addr = pf_addr + blkSize;
             addresses.push_back(AddrPriority(new_addr, 0));
-            replace_adress = blockAddress(pf_addr);
+            // replace_adress = blockAddress(pf_addr);
+            cache->invalidateBlock(
+                cache->tags->findBlock(block_addr, is_secure));
+            std::cout << "calcprefetch hit address" << new_addr << std::endl;
         }
     }
     else {
@@ -145,10 +156,32 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
 
         // Insert new entry's data
         deadBlockTable.insertEntry(deadblock_indexing, is_secure, entry);
+        std::cout << "calcprefetch miss" << std::endl;
     }
 }
 
+inline uint32_t
+DBCPPrefetcherHashedSetAssociative::extractSet(const Addr addr) const
+{
+    const Addr hash1 = addr >> 1;
+    const Addr hash2 = hash1 >> tagShift;
+    return (hash1 ^ hash2) & setMask;
+}
+
+Addr
+DBCPPrefetcherHashedSetAssociative::extractTag(const Addr addr) const
+{
+    return addr;
+}
+
 } // namespace Prefetcher
+
+Prefetcher::DBCPPrefetcherHashedSetAssociative*
+DBCPPrefetcherHashedSetAssociativeParams::create()
+{
+    return new Prefetcher::DBCPPrefetcherHashedSetAssociative(this);
+}
+
 
 Prefetcher::DBCP*
 DBCPPrefetcherParams::create()

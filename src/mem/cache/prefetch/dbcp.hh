@@ -17,6 +17,7 @@
 #include "mem/cache/replacement_policies/replaceable_entry.hh"
 #include "mem/cache/tags/indexing_policies/set_associative.hh"
 #include "mem/packet.hh"
+#include "params/DBCPPrefetcherHashedSetAssociative.hh"
 
 class BaseIndexingPolicy;
 class BaseReplacementPolicy;
@@ -25,6 +26,25 @@ struct DBCPPrefetcherParams;
 extern Addr replace_adress;
 
 namespace Prefetcher {
+
+/**
+ * Override the default set associative to apply a specific hash function
+ * when extracting a set.
+ */
+class DBCPPrefetcherHashedSetAssociative : public SetAssociative
+{
+  protected:
+    uint32_t extractSet(const Addr addr) const override;
+    Addr extractTag(const Addr addr) const override;
+
+  public:
+    DBCPPrefetcherHashedSetAssociative(
+        const DBCPPrefetcherHashedSetAssociativeParams *p)
+      : SetAssociative(p)
+    {
+    }
+    ~DBCPPrefetcherHashedSetAssociative() = default;
+};
 
 class DBCP : public Queued
 {
