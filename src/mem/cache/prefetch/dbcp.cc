@@ -101,9 +101,6 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
     bool is_secure = pfi.isSecure();
     Addr block_addr = blockAddress(pf_addr);
 
-    std::cout << "pf addr: blk addr " << pf_addr
-        << ": " << block_addr << std::endl;
-
     // Search for entry in history pc table
     HistoryEntry history_entry = historyTable[hash(block_addr,
         historyTableSize)];
@@ -120,7 +117,7 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
 
         if (signature_match && new_signature != 0) {
             dead_block_entry->confidence++;
-            std::cout << "match" << std::endl;
+            std::cout << "match" << new_signature << std::endl;
         } else {
             dead_block_entry->confidence--;
             if (dead_block_entry->confidence.calcSaturation() < threshConf) {
