@@ -95,6 +95,12 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
         return;
     }
 
+    if (pfi.isCacheMiss()) {
+        DPRINTF(HWPrefetch, "Ignoring request with cache miss.\n");
+        std::cout << "cache miss" << std::endl;
+        return;
+    }
+
     // Get required packet info
     Addr pf_addr = pfi.getAddr();
     Addr pc = pfi.getPC();
@@ -143,9 +149,9 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
             if (cache) {
                 std::cout << "cache is valid pointer" << std::endl;
                 std::cout << "in cache" <<
-                    inCache(pfi.getPaddr(), is_secure) << std::endl;
+                    inCache(block_addr, is_secure) << std::endl;
                 CacheBlk *blk =
-                    cache->tags->findBlock(pfi.getPaddr(), is_secure);
+                    cache->tags->findBlock(block_addr, is_secure);
                 if (blk) {
                     cache->invalidateBlock(blk);
                     std::cout << "block is set to be replaced" <<
