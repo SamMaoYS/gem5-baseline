@@ -195,9 +195,9 @@ class DBCPPrefetcher(QueuedPrefetcher):
 
     history_table_size = Param.Unsigned(1000, "Size of the History table")
 
-    deadblock_table_assoc = Param.Unsigned(1,
+    deadblock_table_assoc = Param.Unsigned(8,
         "Associativity of the DBCP table")
-    deadblock_table_entries = Param.MemorySize("4",
+    deadblock_table_entries = Param.MemorySize("64",
         "Number of entries of the DBCP table")
     deadblock_table_indexing_policy = Param.BaseIndexingPolicy(
         SetAssociative(entry_size = 1,
