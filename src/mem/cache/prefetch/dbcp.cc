@@ -164,7 +164,7 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
                 is_secure ? "s" : "ns");
 
         DeadBlockEntry* entry = deadBlockTable.findVictim(deadblock_indexing);
-
+        entry->signature = new_signature;
         // Insert new entry's data
         deadBlockTable.insertEntry(deadblock_indexing, is_secure, entry);
     }
