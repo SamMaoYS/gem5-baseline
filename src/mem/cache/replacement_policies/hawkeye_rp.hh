@@ -38,9 +38,9 @@
 #include "mem/cache/replacement_policies/base.hh"
 #include "base/sat_counter.hh"
 #include <unordered_map>
-#define TOTAL_SET 1024 // Equal to size of cache in KB
+#define TOTAL_SET 256 // Equal to size of cache in KB
 #define HISTORY_SIZE TOTAL_SET*8
-#define TOTAL_WAY 1 // assoc
+#define TOTAL_WAY 1024 // assoc
 
 struct HawkEyeRPParams;
 

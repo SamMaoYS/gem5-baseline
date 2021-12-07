@@ -44,7 +44,7 @@ HawkEyeRP::OPTgen::OPTgen()
 }
 void HawkEyeRP::OPTgen::reset()
 {
-    for (int i = 0; i < HISTORY_SIZE; i++)
+    for (int i = 0; i < (HISTORY_SIZE); i++)
     {
         counters[i] = 0;
     }
@@ -58,34 +58,33 @@ uint8_t HawkEyeRP::OPTgen::predict(uint32_t memAddr)
     {
         return 0;
     }
-    uint64_t i = lastAccessed[memAddr];
+    uint64_t lastAccessedLocation = lastAccessed[memAddr];
+    if (currentLocation - lastAccessedLocation >= (HISTORY_SIZE)){
+        // std::cout << "Last access: " << lastAccessedLocation
+        //     << "Current access: " << currentLocation << std::endl;
+        // std::cout << "The last history is now gone!
+        // << "We HAVE to produce cache adverse!"
+        //     << std::endl;
+        return 0;
+    }
     // std::cout << "We're looking at potision between "
-    // << (currentLocation+1)%(HISTORY_SIZE) << " and " << i << "[";
-    // uint64_t j = currentLocation;
-    // for (int i = 0; i < 10; i++)
-    // {
-    //     std::cout << counters[j] << " ";
-    //     if (j > 0)
-    //     {
-    //         j--;
-    //     }
-    //     else
-    //     {
-    //         j = HISTORY_SIZE - 1;
-    //     }
+    //     << currentLocation << "(" << (currentLocation %(HISTORY_SIZE))
+    //     << ") and " << lastAccessedLocation << "("
+    //     << (lastAccessedLocation%(HISTORY_SIZE))
+    //     << ") [";
+    // for (uint64_t i = 0; i < 10; i++){
+    //     std::cout << counters[(currentLocation-i)%(HISTORY_SIZE)] << " ";
     // }
     // std::cout << "]" << std::endl;
-    while (i != (currentLocation+1)%(HISTORY_SIZE))
+    for (uint64_t i = lastAccessedLocation; i <= currentLocation; i++)
     {
-        //std::cout << i << ' ';
-        if (counters[i] >= TOTAL_WAY)
-        {
-            //std::cout << "counter["<< i << "] is at capacity! "
-            // <<"with value " << counters[i] << std::endl;
+        if (counters[i%(HISTORY_SIZE)] >= TOTAL_WAY){
+            // std::cout << "counter["<< i%(HISTORY_SIZE)
+            // << "] is at capacity! "
+            //     <<"with value " << counters[i%(HISTORY_SIZE)]
+            // << std::endl;
             return 0;
         }
-        i++;
-        i %= HISTORY_SIZE;
     }
     return 1;
 }
@@ -93,48 +92,34 @@ uint8_t HawkEyeRP::OPTgen::predict(uint32_t memAddr)
 void HawkEyeRP::OPTgen::insert(uint32_t memAddr, uint8_t hasCapacity)
 {
     currentLocation++;
-    currentLocation %= HISTORY_SIZE;
-    counters[currentLocation] = 0;
+    counters[currentLocation%(HISTORY_SIZE)] = 0;
     // std::cout << "The history before update is [";
-    // uint64_t j = currentLocation;
     // for (int i = 0; i < 10; i++){
-    //     std:: cout << counters[j] << " ";
-    //     if (j>0){
-    //         j--;
-    //     }
-    //     else{
-    //         j = HISTORY_SIZE-1;
-    //     }
+    //     std:: cout << counters[(currentLocation-i)%(HISTORY_SIZE)] << " ";
     // }
     // std::cout << "]" << std::endl;
-    // std::cout << "current location is :" << currentLocation << std::endl;
+    // std::cout << "current location is :" << currentLocation << "("
+    //     << (currentLocation %(HISTORY_SIZE)) << ")" << std::endl;
     if (lastAccessed.find(memAddr) != lastAccessed.end() && hasCapacity)
     {
-        uint64_t i = lastAccessed[memAddr];
-        //std::cout << "update from " << i << std::endl;
-        while (i != currentLocation)
+        uint64_t lastAccessedLocation = lastAccessed[memAddr];
+        // std::cout << "update from " << lastAccessedLocation
+        // << "(" << (lastAccessedLocation % (HISTORY_SIZE)) << ")"
+        // << std::endl;
+        for (uint64_t i = lastAccessedLocation; i < currentLocation; i++)
         {
-            counters[i]++;
-            if (counters[i] >= TOTAL_WAY)
+            uint64_t j = i % (HISTORY_SIZE);
+            counters[j]++;
+            if (counters[j] >= TOTAL_WAY)
             {
-                counters[i] = TOTAL_WAY;
-                //lastFullLocation = i;
+                counters[j] = TOTAL_WAY;
             }
-            i++;
-            i %= HISTORY_SIZE;
         }
     }
     lastAccessed[memAddr] = currentLocation;
     // std::cout << "The history after update is [";
-    // j = currentLocation;
     // for (int i = 0; i < 10; i++){
-    //     std:: cout << counters[j] << " ";
-    //     if (j>0){
-    //         j--;
-    //     }
-    //     else{
-    //         j = HISTORY_SIZE-1;
-    //     }
+    //     std:: cout << counters[(currentLocation-i)%(HISTORY_SIZE)] << " ";
     // }
     // std::cout << "]" << std::endl;
 }
@@ -182,6 +167,8 @@ HawkEyeRP::touch(const std::shared_ptr<ReplacementData> &replacement_data)
     uint32_t way = casted_replacement_data->way;
     OPTgen *currentOPTgen = (OPTgen *)(&optgens[set]);
     uint8_t predict = currentOPTgen->predict(way);
+    int localRRPV = casted_replacement_data->rrpv;
+    // std::cout << "RRPV before update is " << localRRPV << std::endl;
     if (predict)
     {
         casted_replacement_data->rrpv -= 7;
@@ -191,7 +178,8 @@ HawkEyeRP::touch(const std::shared_ptr<ReplacementData> &replacement_data)
         casted_replacement_data->rrpv += 7;
     }
     currentOPTgen->insert(way, predict);
-
+    localRRPV = casted_replacement_data->rrpv;
+    // std::cout << "RRPV after update is " << localRRPV << std::endl;
     // std::cout << "Touching set: " << set <<
     //     " way: " << way << " with predicted result "
     //     << (int)(predict) << std::endl;
@@ -210,8 +198,8 @@ void HawkEyeRP::reset(
     // At the beginning, all blocks are cache adverse
     casted_replacement_data->rrpv += 7;
     casted_replacement_data->valid = true;
-
-    //std::cout << "Inserting at set: " << set << " way: " << way << std::endl;
+    // std::cout << "Inserting at set: "
+    // << set << " way: " << way << std::endl;
 }
 
 ReplaceableEntry *
