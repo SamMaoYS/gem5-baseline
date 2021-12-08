@@ -97,7 +97,7 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
 
     if (pfi.isCacheMiss()) {
         DPRINTF(HWPrefetch, "Ignoring request with cache miss.\n");
-        std::cout << "cache miss" << std::endl;
+        // std::cout << "cache miss" << std::endl;
         return;
     }
 
@@ -123,7 +123,7 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
 
         if (signature_match && new_signature != 0) {
             dead_block_entry->confidence++;
-            std::cout << "match" << new_signature << std::endl;
+            // std::cout << "match" << new_signature << std::endl;
         } else {
             dead_block_entry->confidence--;
             if (dead_block_entry->confidence.calcSaturation() < threshConf) {
@@ -137,8 +137,8 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
                 (int)dead_block_entry->confidence);
 
         if (dead_block_entry->confidence.calcSaturation() < threshConf) {
-            std::cout << "confidence is not enough" <<
-                dead_block_entry->confidence.calcSaturation() << std::endl;
+            // std::cout << "confidence is not enough" <<
+            //     dead_block_entry->confidence.calcSaturation() << std::endl;
             return;
         }
 
@@ -147,24 +147,25 @@ DBCP::calculatePrefetch(const PrefetchInfo &pfi,
             addresses.push_back(AddrPriority(new_addr, 0));
             // replace_adress = blockAddress(pf_addr);
             if (cache) {
-                std::cout << "cache is valid pointer" << std::endl;
-                std::cout << "in cache" <<
-                    inCache(block_addr, is_secure) << std::endl;
+                // std::cout << "cache is valid pointer" << std::endl;
+                // std::cout << "in cache" <<
+                //     inCache(block_addr, is_secure) << std::endl;
                 CacheBlk *blk =
                     cache->tags->findBlock(block_addr, is_secure);
                 if (blk) {
                     cache->invalidateBlock(blk);
-                    std::cout << "block is set to be replaced" <<
-                        block_addr << std::endl;
+                    // std::cout << "block is set to be replaced" <<
+                    //     block_addr << std::endl;
                 }
                 else {
                     std::cout << "block is not in the cache" << std::endl;
                 }
             }
             else {
-                std::cout << "cache is null pointer" << std::endl;
+                // std::cout << "cache is null pointer" << std::endl;
             }
-            std::cout << "calcprefetch hit address" << block_addr << std::endl;
+            // std::cout
+            // << "calcprefetch hit address" << block_addr << std::endl;
         }
     }
     else {
@@ -205,5 +206,6 @@ DBCPPrefetcherHashedSetAssociativeParams::create()
 Prefetcher::DBCP*
 DBCPPrefetcherParams::create()
 {
+    std::cout << "DBCP started" << std::endl;
     return new Prefetcher::DBCP(this);
 }
