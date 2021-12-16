@@ -1,3 +1,13 @@
+## Build
+```bash
+scons -j 8 build/X86/gem5.opt CPU_MODELS='AtomicSimpleCPU,O3CPU,TimingSimpleCPU,MinorCPU'
+```
+
+## DBCP
+The implementation of DBCP is located in `src/mem/cache/prefetch/dbcp.hh`, `src/mem/cache/prefetch/dbcp.cc`, `src/mem/cache/prefetch/Prefetcher.py`. `src/mem/cache/prefetch/SConscript`
+
+## HawkEye
+
 This is the gem5 simulator.
 
 The main website can be found at http://www.gem5.org
