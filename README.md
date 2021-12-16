@@ -1,3 +1,10 @@
+# Clone the repo
+
+
+```bash
+git clone https://github.com/SamMaoYS/gem5-baseline --recursive
+```
+
 ## Build
 
 ```bash
