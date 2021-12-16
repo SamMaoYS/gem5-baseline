@@ -1,4 +1,5 @@
 ## Build
+
 ```bash
 scons -j 8 build/X86/gem5.opt CPU_MODELS='AtomicSimpleCPU,O3CPU,TimingSimpleCPU,MinorCPU'
 ```
