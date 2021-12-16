@@ -7,6 +7,13 @@ scons -j 8 build/X86/gem5.opt CPU_MODELS='AtomicSimpleCPU,O3CPU,TimingSimpleCPU,
 ## DBCP
 The implementation of DBCP is located in `src/mem/cache/prefetch/dbcp.hh`, `src/mem/cache/prefetch/dbcp.cc`, `src/mem/cache/prefetch/Prefetcher.py`. `src/mem/cache/prefetch/SConscript`
 
+In order to invoke the DBCP to the LLC, in the config file `run_spec/gem5-config/system.py`. in L1 data cache set the prefetcher as follows:
+
+```python
+tags = BaseSetAssoc()
+prefetcher = DBCPPrefetcher()
+```
+
 ## HawkEye
 The implementation of the HawkEye is located in `src/mem/cache/replacement_policies/hawkeye_rp.hh`, `src/mem/cache/replacement_policies/hawkeye_rp.cc`, `src/mem/cache/replacement_policies/ReplacementPolicies.py`. `src/mem/cache/replacement_policies/SConscript`
 
