@@ -176,6 +176,38 @@ class StridePrefetcher(QueuedPrefetcher):
     table_replacement_policy = Param.BaseReplacementPolicy(RandomRP(),
         "Replacement policy of the PC table")
 
+class DBCPPrefetcherHashedSetAssociative(SetAssociative):
+    type = 'DBCPPrefetcherHashedSetAssociative'
+    cxx_class = 'Prefetcher::DBCPPrefetcherHashedSetAssociative'
+    cxx_header = "mem/cache/prefetch/dbcp.hh"
+
+class DBCPPrefetcher(QueuedPrefetcher):
+    type = 'DBCPPrefetcher'
+    cxx_class = 'Prefetcher::DBCP'
+    cxx_header = "mem/cache/prefetch/dbcp.hh"
+
+    confidence_counter_bits = Param.Unsigned(2,
+        "Number of bits of the confidence counter")
+    initial_confidence = Param.Unsigned(2,
+        "Starting confidence of new entries")
+    confidence_threshold = Param.Percent(50,
+        "Prefetch generation confidence threshold")
+
+    history_table_size = Param.Unsigned(1000, "Size of the History table")
+
+    deadblock_table_assoc = Param.Unsigned(8,
+        "Associativity of the DBCP table")
+    deadblock_table_entries = Param.MemorySize("64",
+        "Number of entries of the DBCP table")
+    deadblock_table_indexing_policy = Param.BaseIndexingPolicy(
+        SetAssociative(entry_size = 1,
+        assoc = Parent.deadblock_table_assoc,
+        size = Parent.deadblock_table_entries),
+        "Indexing policy of the DBCP table")
+    deadblock_table_replacement_policy = Param.BaseReplacementPolicy(
+        RandomRP(),
+        "Replacement policy of the DBCP table")
+
 class TaggedPrefetcher(QueuedPrefetcher):
     type = 'TaggedPrefetcher'
     cxx_class = 'Prefetcher::Tagged'

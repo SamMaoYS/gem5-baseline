@@ -251,12 +251,14 @@ class Base : public ClockedObject
         }
     };
 
-  protected:
+  public:
 
     // PARAMETERS
 
     /** Pointr to the parent cache. */
     BaseCache* cache;
+
+  protected:
 
     /** The block size of the parent cache. */
     unsigned blkSize;
