@@ -1,0 +1,66 @@
+warn: l1_to_l2.slave is deprecated. `slave` is now called `cpu_side_ports`
+warn: l1_to_l2.slave is deprecated. `slave` is now called `cpu_side_ports`
+warn: l1_to_l2.master is deprecated. `master` is now called `mem_side_ports`
+warn: membus.slave is deprecated. `slave` is now called `cpu_side_ports`
+warn: membus.master is deprecated. `master` is now called `mem_side_ports`
+warn: membus.slave is deprecated. `slave` is now called `cpu_side_ports`
+warn: interrupts.int_master is deprecated. `int_master` is now called `int_requestor`
+warn: membus.master is deprecated. `master` is now called `mem_side_ports`
+warn: interrupts.int_slave is deprecated. `int_slave` is now called `int_responder`
+warn: membus.slave is deprecated. `slave` is now called `cpu_side_ports`
+warn: membus.master is deprecated. `master` is now called `mem_side_ports`
+warn: No dot file generated. Please install pydot to generate the dot file and pdf.
+0: system.remote_gdb: listening for remote gdb on port 7014
+info: Entering event queue @ 0.  Starting simulation...
+warn: x86 cpuid family 0x0000: unimplemented function 13
+warn: ignoring syscall access(...)
+info: Increasing stack size by one page.
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall mprotect(...)
+info: Increasing stack size by one page.
+info: Increasing stack size by one page.
+warn: MOVNTDQ: Ignoring non-temporal hint, modeling as cacheable!
+info: Increasing stack size by one page.
+info: Entering event queue @ 62200759750.  Starting simulation...
+gem5.opt: build/X86/cpu/o3/cpu.cc:823: void FullO3CPU<Impl>::removeThread(ThreadID) [with Impl = O3CPUImpl; ThreadID = short int]: Assertion `commit.rob->isEmpty(tid)' failed.
+Program aborted at tick 62200763500
+--- BEGIN LIBC BACKTRACE ---
+/localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt(+0x5b0330)[0x564887abb330]
+/localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt(+0x5c486e)[0x564887acf86e]
+/lib/x86_64-linux-gnu/libpthread.so.0(+0x153c0)[0x7f4eed4093c0]
+/lib/x86_64-linux-gnu/libc.so.6(gsignal+0xcb)[0x7f4eec5b118b]
+/lib/x86_64-linux-gnu/libc.so.6(abort+0x12b)[0x7f4eec590859]
+/lib/x86_64-linux-gnu/libc.so.6(+0x25729)[0x7f4eec590729]
+/lib/x86_64-linux-gnu/libc.so.6(+0x36f36)[0x7f4eec5a1f36]
+/localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt(+0x15b65ca)[0x564888ac15ca]
+/localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt(+0x15b6905)[0x564888ac1905]
+/localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt(+0x15b771d)[0x564888ac271d]
+/localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt(+0x5b83a9)[0x564887ac33a9]
+/localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt(+0x5d9f38)[0x564887ae4f38]
+/localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt(+0x5dad2d)[0x564887ae5d2d]
+/localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt(+0x7d6ab0)[0x564887ce1ab0]
+/localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt(+0x4fd31f)[0x564887a0831f]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(+0x2a8408)[0x7f4eed6bf408]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(_PyObject_MakeTpCall+0xab)[0x7f4eed6bf7db]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(+0x74df3)[0x7f4eed48bdf3]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(_PyEval_EvalFrameDefault+0x7d86)[0x7f4eed493ef6]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(_PyEval_EvalCodeWithName+0x8fb)[0x7f4eed5e1d3b]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(_PyFunction_Vectorcall+0x94)[0x7f4eed6bede4]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(+0x74d6d)[0x7f4eed48bd6d]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(_PyEval_EvalFrameDefault+0x12fd)[0x7f4eed48d46d]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(+0x8006b)[0x7f4eed49706b]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(+0x74d6d)[0x7f4eed48bd6d]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(_PyEval_EvalFrameDefault+0x12fd)[0x7f4eed48d46d]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(+0x8006b)[0x7f4eed49706b]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(+0x74d6d)[0x7f4eed48bd6d]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(_PyEval_EvalFrameDefault+0x7d86)[0x7f4eed493ef6]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(_PyEval_EvalCodeWithName+0x8fb)[0x7f4eed5e1d3b]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(PyEval_EvalCodeEx+0x42)[0x7f4eed5e20c2]
+/lib/x86_64-linux-gnu/libpython3.8.so.1.0(PyEval_EvalCode+0x1f)[0x7f4eed5e24af]
+--- END LIBC BACKTRACE ---

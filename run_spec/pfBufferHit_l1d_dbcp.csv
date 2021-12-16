@@ -1,0 +1,10 @@
+benchmark,DDR3_1600_8x8-Simple,DDR3_1600_8x8-DefaultO3
+505.mcf_r,0.0,0.0
+510.parest_r,0.0,0.0
+523.xalancbmk_r,0.0,0.0
+531.deepsjeng_r,0.0,0.0
+541.leela_r,0.0,0.0
+605.mcf_s,0.0,0.0
+623.xalancbmk_s,0.0,0.0
+631.deepsjeng_s,0.0,0.0
+641.leela_s,0.0,0.0

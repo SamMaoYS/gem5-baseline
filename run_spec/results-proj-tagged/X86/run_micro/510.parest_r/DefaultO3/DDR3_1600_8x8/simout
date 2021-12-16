@@ -1,0 +1,92 @@
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 20.1.0.2
+gem5 compiled Dec  9 2021 16:08:47
+gem5 started Dec  9 2021 16:20:08
+gem5 executing on cs-arch-srv01, pid 1803951
+command line: /localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt -re --outdir=/local-scratch/localhome/tianhaot/run_spec/results-proj-tagged/X86/run_micro/510.parest_r/DefaultO3/DDR3_1600_8x8 gem5-config-tagged/run_micro.py DefaultO3 DDR3_1600_8x8 /data/benchmarks/spec2017/benchspec/CPU/510.parest_r/exe/parest_r_base.mytest-m64 /data/benchmarks/spec2017/benchspec/CPU/510.parest_r/data/test/input/test.prm --clock 4GHz -W 0 -I 500000000
+
+4GHz
+Warm up instruction: 0
+Execution instruction: 500000000
+Global frequency set at 1000000000000 ticks per second
+pkt in cache10894728
+pkt in cache10894728
+pkt in cache10903056
+pkt in cache10903056
+pkt in cache12634640
+pkt in cache12634640
+pkt in cache10891552
+pkt in cache10891552
+master (0) [2]: Starting master...
+pkt in cache10891552
+pkt in cache10891552
+pkt in cache10901968
+pkt in cache10901968
+pkt in cache10901944
+pkt in cache10901944
+pkt in cache12836676
+pkt in cache12836676
+pkt in cache12836792
+pkt in cache12836792
+pkt in cache12836676
+pkt in cache12836676
+pkt in cache12836792
+pkt in cache12836792
+pkt in cache12836676
+pkt in cache12836676
+pkt in cache12836792
+pkt in cache12836792
+pkt in cache12132422
+pkt in cache12132422
+pkt in cache12797616
+pkt in cache12797616
+pkt in cache12797624
+pkt in cache12797624
+master (0) [2]: New master parameter discretization: 32 parameter dofs.
+pkt in cache10891552
+pkt in cache10891552
+pkt in cache10903288
+pkt in cache10903288
+pkt in cache10903216
+pkt in cache10903216
+pkt in cache10903160
+pkt in cache10903160
+pkt in cache12683248
+pkt in cache12683248
+pkt in cache12888080
+pkt in cache12888080
+pkt in cache12888088
+pkt in cache12888088
+pkt in cache12870024
+pkt in cache12870024
+pkt in cache12835076
+pkt in cache12835076
+pkt in cache12835192
+pkt in cache12835192
+pkt in cache12836552
+pkt in cache12836552
+pkt in cache12835076
+pkt in cache12835076
+pkt in cache12835192
+pkt in cache12835192
+pkt in cache12835076
+pkt in cache12835076
+pkt in cache12835192
+pkt in cache12835192
+pkt in cache16109616
+pkt in cache16109616
+pkt in cache16109616
+pkt in cache16109616
+pkt in cache16109632
+pkt in cache16109632
+Writing checkpoint
+Exit Eventa thread reached the max instruction count
+Terminated simulation before reaching ROI!
+Exit Eventa thread reached the max instruction count
+Performance statistics:
+Simulated time: 0.10s
+Instructions executed: 500000004
+Ran a total of 0.09681450625 simulated seconds
+Total wallclock time: 2375.25s, 39.59 min

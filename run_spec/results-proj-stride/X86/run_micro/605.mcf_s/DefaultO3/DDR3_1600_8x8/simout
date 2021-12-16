@@ -1,0 +1,31 @@
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 20.1.0.2
+gem5 compiled Dec  9 2021 16:08:47
+gem5 started Dec  9 2021 16:19:53
+gem5 executing on cs-arch-srv01, pid 1803452
+command line: /localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt -re --outdir=/local-scratch/localhome/tianhaot/run_spec/results-proj-stride/X86/run_micro/605.mcf_s/DefaultO3/DDR3_1600_8x8 gem5-config-stride/run_micro.py DefaultO3 DDR3_1600_8x8 /data/benchmarks/spec2017/benchspec/CPU/605.mcf_s/exe/mcf_s_base.mytest-m64 /data/benchmarks/spec2017/benchspec/CPU/505.mcf_r/data/test/input/inp.in --clock 4GHz -W 0 -I 500000000
+
+4GHz
+Warm up instruction: 0
+Execution instruction: 500000000
+Global frequency set at 1000000000000 ticks per second
+
+MCF SPEC CPU version 1.11
+Copyright (c) 1998-2000 Zuse Institut Berlin (ZIB)
+Copyright (c) 2000-2002 Andreas Loebel & ZIB
+Copyright (c) 2003-2005 Andreas Loebel
+Copyright (c) 2006-2010 Dres. Loebel, Borndoerfer & Weider GbR (LBW)
+
+nodes                      : 5985
+active arcs                : 102404
+Writing checkpoint
+Exit Eventa thread reached the max instruction count
+Terminated simulation before reaching ROI!
+Exit Eventa thread reached the max instruction count
+Performance statistics:
+Simulated time: 0.20s
+Instructions executed: 500000002
+Ran a total of 0.20400781 simulated seconds
+Total wallclock time: 3408.18s, 56.80 min

@@ -1,0 +1,24 @@
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 20.1.0.2
+gem5 compiled Dec 11 2021 23:24:50
+gem5 started Dec 12 2021 20:56:56
+gem5 executing on cs-arch-srv01, pid 2761853
+command line: /localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt -re --outdir=/local-scratch/localhome/tianhaot/run_spec/results-proj-he/X86/run_micro/541.leela_r/Simple/DDR3_1600_8x8 gem5-config-he/run_micro.py Simple DDR3_1600_8x8 /data/benchmarks/spec2017/benchspec/CPU/541.leela_r/exe/leela_r_base.mytest-m64 /data/benchmarks/spec2017/benchspec/CPU/541.leela_r/data/test/input/test.sgf --clock 4GHz -W 0 -I 1000000000
+
+4GHz
+Warm up instruction: 0
+Execution instruction: 1000000000
+Global frequency set at 1000000000000 ticks per second
+Initializing HawkEye Replacement Policy...
+Nodes: 1, Win:  0.0%, PV: 
+Writing checkpoint
+Exit Eventa thread reached the max instruction count
+Terminated simulation before reaching ROI!
+Exit Eventa thread reached the max instruction count
+Performance statistics:
+Simulated time: 0.47s
+Instructions executed: 1000000001
+Ran a total of 0.473007175 simulated seconds
+Total wallclock time: 1083.11s, 18.05 min

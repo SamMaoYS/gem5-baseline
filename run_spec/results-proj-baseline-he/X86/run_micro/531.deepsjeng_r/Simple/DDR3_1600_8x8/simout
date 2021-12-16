@@ -1,0 +1,25 @@
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 20.1.0.2
+gem5 compiled Dec 11 2021 23:24:50
+gem5 started Dec 12 2021 20:56:58
+gem5 executing on cs-arch-srv01, pid 2762085
+command line: /localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt -re --outdir=/local-scratch/localhome/tianhaot/run_spec/results-proj-baseline/X86/run_micro/531.deepsjeng_r/Simple/DDR3_1600_8x8 gem5-config-proj/run_micro.py Simple DDR3_1600_8x8 /data/benchmarks/spec2017/benchspec/CPU/531.deepsjeng_r/exe/deepsjeng_r_base.mytest-m64 '' --clock 4GHz -W 0 -I 1000000000
+
+4GHz
+Warm up instruction: 0
+Execution instruction: 1000000000
+Global frequency set at 1000000000000 ticks per second
+Deep Sjeng version 3.2 SPEC, Copyright (C) 2000-2009 Gian-Carlo Pascutto
+Allocated 15000000 hash entries, totalling 720000000 bytes.
+Please specify the workfile.
+Writing checkpoint
+Exit Eventexiting with last active thread context
+Terminated simulation before reaching ROI!
+Exit Eventexiting with last active thread context
+Performance statistics:
+Simulated time: 0.69s
+Instructions executed: 81132245
+Ran a total of 0.69217454 simulated seconds
+Total wallclock time: 263.80s, 4.40 min

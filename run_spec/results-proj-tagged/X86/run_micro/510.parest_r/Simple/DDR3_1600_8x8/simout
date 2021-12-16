@@ -1,0 +1,24 @@
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 20.1.0.2
+gem5 compiled Dec  9 2021 16:08:47
+gem5 started Dec  9 2021 16:20:08
+gem5 executing on cs-arch-srv01, pid 1803950
+command line: /localhome/tianhaot/750proj/gem5-baseline/build/X86/gem5.opt -re --outdir=/local-scratch/localhome/tianhaot/run_spec/results-proj-tagged/X86/run_micro/510.parest_r/Simple/DDR3_1600_8x8 gem5-config-tagged/run_micro.py Simple DDR3_1600_8x8 /data/benchmarks/spec2017/benchspec/CPU/510.parest_r/exe/parest_r_base.mytest-m64 /data/benchmarks/spec2017/benchspec/CPU/510.parest_r/data/test/input/test.prm --clock 4GHz -W 0 -I 500000000
+
+4GHz
+Warm up instruction: 0
+Execution instruction: 500000000
+Global frequency set at 1000000000000 ticks per second
+master (0) [2]: Starting master...
+master (0) [2]: New master parameter discretization: 32 parameter dofs.
+Writing checkpoint
+Exit Eventa thread reached the max instruction count
+Terminated simulation before reaching ROI!
+Exit Eventa thread reached the max instruction count
+Performance statistics:
+Simulated time: 0.27s
+Instructions executed: 500000001
+Ran a total of 0.27097734625 simulated seconds
+Total wallclock time: 626.74s, 10.45 min
