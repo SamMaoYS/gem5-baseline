@@ -1,7 +1,7 @@
 ## Build
 
 ```bash
-scons -j 8 build/X86/gem5.opt CPU_MODELS='AtomicSimpleCPU,O3CPU,TimingSimpleCPU,MinorCPU'
+scons -j [Number of Threads] build/X86/gem5.opt CPU_MODELS='AtomicSimpleCPU,O3CPU,TimingSimpleCPU,MinorCPU'
 ```
 
 ## DBCP
@@ -17,7 +17,7 @@ prefetcher = DBCPPrefetcher()
 ## HawkEye
 The implementation of the HawkEye is located in `src/mem/cache/replacement_policies/hawkeye_rp.hh`, `src/mem/cache/replacement_policies/hawkeye_rp.cc`, `src/mem/cache/replacement_policies/ReplacementPolicies.py`. `src/mem/cache/replacement_policies/SConscript`
 
-In order to invoke the HawkEye to the LLC, there is a configuration file located under `run_spec/gem5-config-*/system.py`. There are many directories corresponding to different configurations. "baseline-dbcp" indicates the baseline (LRU) configuration for DBCP code, "baseline-he" indicates the baseline (LRU) configuration for HawkEye code. "stride" and "tagged" indicates the configuration using stride and tagged prefetch policy respectively. "-dbcp" and "-he" indicates the actual configuration that utilizes DBCP and HawkEye. In this file, each cache is declared as a class inherits the original class of Cache. For a particular cache, the replacement policy can be set using the following line
+In order to invoke the HawkEye to the LLC, there is a configuration file located under `run_spec/gem5-config-*/system.py`. There are many directories corresponding to different configurations. "-baseline-dbcp" indicates the baseline (LRU) configuration for DBCP code, "-baseline-he" indicates the baseline (LRU) configuration for HawkEye code. "-stride" and "-tagged" indicates the configuration using stride and tagged prefetch policy respectively. "-dbcp" and "-he" indicates the actual configuration that utilizes DBCP and HawkEye. In this file, each cache is declared as a class inherits the original class of Cache. For a particular cache, the replacement policy can be set using the following line
 
 ```python
 replacement_policy = HawkEyeRP()
@@ -42,9 +42,9 @@ and then execute the python file
 python3 launch-project-*-boi.py [Number of threads]
 ```
 
-The python files are configured to look for SPEC 2017 file in /data/benchmarks/spec2017/ which is on the arch1 research machine of SFU Architecture Lab. Please change that if you're running on a different machine
+The python files are configured to look for SPEC 2017 file in `/data/benchmarks/spec2017/` which is on the arch1 research machine of SFU Architecture Lab. Please change that if you're running on a different machine
 
-The result will be outputed to results-*/ directory. You can use extract*.py to extract them into CSV files.
+The result will be outputed to `results-*/` directory. You can use `extract*.py` to extract them into CSV files.
 
 The SPEC 2017 benchmark is configured to be executed on the gem5 simulator in order to evaluate the replacement policy.
 
