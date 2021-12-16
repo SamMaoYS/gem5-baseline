@@ -8,7 +8,18 @@ scons -j 8 build/X86/gem5.opt CPU_MODELS='AtomicSimpleCPU,O3CPU,TimingSimpleCPU,
 The implementation of DBCP is located in `src/mem/cache/prefetch/dbcp.hh`, `src/mem/cache/prefetch/dbcp.cc`, `src/mem/cache/prefetch/Prefetcher.py`. `src/mem/cache/prefetch/SConscript`
 
 ## HawkEye
+The implementation of the HawkEye is located in `src/mem/cache/replacement_policies/hawkeye_rp.hh`, `src/mem/cache/replacement_policies/hawkeye_rp.cc`, `src/mem/cache/replacement_policies/ReplacementPolicies.py`. `src/mem/cache/replacement_policies/SConscript`
 
+In order to invoke the HawkEye to the LLC, there is a configuration file located under `run_spec/gem5-config/system.py`. In this file, each cache is declared as a class inherits the original class of Cache. For a particular cache, the replacement policy can be set using the following line
+
+```python
+replacement_policy = HawkEyeRP()
+```
+
+The SPEC 2017 benchmark is configured to be executed on the gem5 simulator in order to evaluate the replacement policy.
+
+
+## About gem5 simulator Baseline
 This is the gem5 simulator.
 
 The main website can be found at http://www.gem5.org
